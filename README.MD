@@ -1,5 +1,7 @@
 # gorilla-bass
 
+Criado no dia 19/05/2025
+
 ## Integrantes
 **RM 566422**
 
