@@ -9,5 +9,7 @@ Criado no dia 19/05/2025
 
 **Milton Jakson de Souza Marcelino RM564836**
 
+**Gustavo Bardy Casimiro RM566136**
+
 ## Sobre
 Respositório criado para o Checkpoint 3 de front-end: "1 gorilas contra 100 humanos".
