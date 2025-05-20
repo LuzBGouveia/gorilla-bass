@@ -3,9 +3,9 @@
 Criado no dia 19/05/2025
 
 ## Integrantes
-**Lucas Barros Gouveia RM 566422**
+**Lucas Barros Gouveia RM566422**
 
-**Enzo Okuizumi Miranda de SouzaRM 561432**
+**Enzo Okuizumi Miranda de Souza RM561432**
 
 **Milton Jakson de Souza Marcelino RM564836**
 
