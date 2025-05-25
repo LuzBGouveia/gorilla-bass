@@ -290,4 +290,166 @@ document.addEventListener('DOMContentLoaded', () => {
         isAnimating = false;
         endGorillaTurn();
     });
+
+    resetBtn.addEventListener('click', async () => { // Assumindo que o botão de curar é para descansar/energia
+        if (isGameOver || isAnimating || currentPlayerTurn !== 'gorilla') {
+            return;
+        }
+        isAnimating = true;
+        enableActionButtons(false);
+
+        const energyGained = Math.min(REST_ENERGY_GAIN, MAX_GORILLA_ENERGY - gorillaState.energy);
+        if (energyGained > 0) {
+            gorillaState.energy += energyGained;
+            updateGorillaStatusDisplay();
+            addLogEntry(`Gorila DESCANSA e recupera ${energyGained} de energia.`, "gorilla");
+            await animateGorillaAction('rest-animation', 1000); // Crie 'rest-animation' (ex: brilho verde suave)
+        } else {
+            addLogEntry("Gorila tenta descansar, mas já está com energia máxima!", "system");
+            await new Promise(resolve => setTimeout(resolve, 500)); // Pequena pausa
+        }
+        
+        isAnimating = false;
+        endGorillaTurn(false); // Humanos não atacam se o gorila apenas descansou (opcional)
+    });
+
+    //Lógica de Turno
+    function endGorillaTurn(humansShouldAttack = true) {
+        if (checkGameEndConditions()) return;
+
+        currentPlayerTurn = 'humans';
+        addLogEntry("Turno dos Humanos...", "system");
+        enableActionButtons(false); // Desabilita botões do gorila durante turno humano
+
+        if (humansShouldAttack && humansAliveCount > 0) {
+            setTimeout(humansTurnAction, 1200); // Atraso para dar tempo de ler o log
+        } else {
+            if (humansAliveCount <=0) {
+                addLogEntry("Todos os humanos foram derrotados!", "system");
+            } else {
+                addLogEntry("Humanos observam cautelosamente...", "human");
+            }
+            setTimeout(endHumansTurn, 1000);
+        }
+    }
+
+    async function humansTurnAction() {
+        if (isGameOver || humansAliveCount <= 0) {
+            endHumansTurn(); // Garante a transição de volta
+            return;
+        }
+        isAnimating = true; // Bloqueia qualquer interação acidental
+
+        let actualAttackingHumans = 0;
+        let totalPotentialDamage = 0;
+
+        // Simula grupos de humanos atacando
+        const numberOfGroups = Math.ceil(humansAliveCount / NUM_HUMANS_IN_ATTACKING_GROUP);
+        for (let i = 0; i < numberOfGroups; i++) {
+            if (Math.random() < HUMANS_ATTACK_CHANCE_PER_HUMAN_GROUP) {
+                // Este grupo ataca
+                const humansInThisAttackingWave = Math.min(NUM_HUMANS_IN_ATTACKING_GROUP, humansAliveCount - (actualAttackingHumans * NUM_HUMANS_IN_ATTACKING_GROUP)); //não lembro disso
+                
+                for(let j = 0; j < humansInThisAttackingWave; j++) {
+                    totalPotentialDamage += Math.floor(Math.random() * (HUMANS_ATTACK_POWER_MAX - HUMANS_ATTACK_POWER_MIN + 1)) + HUMANS_ATTACK_POWER_MIN;
+                    actualAttackingHumans++; // Conta cada humano individualmente para o log de dano
+                }
+            }
+        }
+
+
+        if (actualAttackingHumans === 0) {
+            addLogEntry("Humanos decidem não atacar desta vez.", "human");
+            await new Promise(resolve => setTimeout(resolve, 1000)); // Pausa para leitura
+        } else {
+            addLogEntry(`${actualAttackingHumans} Humanos avançam para o ATAQUE!`, "human");
+            // Animação dos humanos atacando (pode ser um flash nos ícones deles ou um som)
+            // await animate(humansGridContainer, 'humans-attack-prep-animation', 500); // Crie esta animação
+
+            await new Promise(resolve => setTimeout(resolve, 800)); // Pausa antes do impacto
+
+            const damageAbsorbedByDefense = Math.min(totalPotentialDamage, gorillaState.defenseBonus);
+            const damageTakenByGorilla = Math.max(0, totalPotentialDamage - gorillaState.defenseBonus);
+
+            gorillaState.health = Math.max(0, gorillaState.health - damageTakenByGorilla);
+            
+            if (damageTakenByGorilla > 0) {
+                addLogEntry(`Gorila é atingido e sofre ${damageTakenByGorilla} de dano! (Defendido: ${damageAbsorbedByDefense})`, "human");
+                await animateGorillaDamage(damageTakenByGorilla);
+            } else if (totalPotentialDamage > 0) {
+                addLogEntry("Os ataques dos humanos são totalmente bloqueados pela defesa do Gorila!", "human");
+                // Animação de defesa bem-sucedida no gorila (ex: escudo piscando)
+                await animate(mainGorillaImg, 'defense-success-animation', 600); // Crie esta animação
+            } else {
+                addLogEntry("Os humanos tentam atacar, mas não causam nenhum dano.", "human");
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+            updateGorillaStatusDisplay();
+
+            // Reduzir bônus de defesa se foi usado
+            if (gorillaState.defenseBonus > 0 && damageAbsorbedByDefense > 0) {
+                gorillaState.defenseBonus = Math.max(0, gorillaState.defenseBonus - Math.ceil(DEFEND_BONUS_GAIN / 2)); // Defesa decai
+                addLogEntry("A defesa bônus do Gorila enfraquece.", "system");
+                updateGorillaStatusDisplay();
+            }
+        }
+        
+        isAnimating = false;
+        endHumansTurn();
+    }
+
+    function endHumansTurn() {
+        if (checkGameEndConditions()) return;
+        
+        currentPlayerTurn = 'gorilla';
+        addLogEntry("Turno do Gorila! Prepare sua ação.", "system");
+        enableActionButtons(true);
+        saveGameState(); // Salva o estado no final do turno dos humanos
+    }
+
+    //Fim de Jogo e Reinício
+    function checkGameEndConditions() {
+        if (isGameOver) return true; // Já terminou
+
+        if (gorillaState.health <= 0) {
+            triggerGameOver("Os humanos venceram! O Gorila foi derrotado.");
+            return true;
+        }
+        if (humansAliveCount <= 0) {
+            triggerGameOver("O Gorila venceu! Todos os humanos foram eliminados.");
+            return true;
+        }
+        return false;
+    }
+
+    function triggerGameOver(message) {
+        isGameOver = true;
+        isAnimating = false; // Para qualquer animação
+        currentPlayerTurn = 'none'; // Ninguém joga
+        enableActionButtons(false);
+        
+        gameOverMessage.textContent = message;
+        gameOverSection.style.display = 'block';
+        addLogEntry(message, "system end-game-message"); // Adicionar classe para estilizar se quiser
+
+        //Limpar estado do jogo salvo quando o gorila perde
+        if (gorillaState.health <= 0) {
+            localStorage.removeItem('gorillaBassGameState');
+        }
+    }
+
+    restartBtn.addEventListener('click', () => {
+        addLogEntry("Jogo reiniciado!", "system");
+        localStorage.removeItem('gorillaBassGameState'); // Limpa o save para um novo começo
+        initializeGame(); // Reinicia o jogo do zero
+    });
+
+    function enableActionButtons(enable) {
+        const canInteract = enable && !isAnimating && currentPlayerTurn === 'gorilla' && !isGameOver;
+        attackBtn.disabled = !canInteract;
+        defendBtn.disabled = !canInteract;
+        resetBtn.disabled = !canInteract;
+    }
+
+    
 })
