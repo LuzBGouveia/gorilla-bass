@@ -506,6 +506,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- Iniciar o Jogo ---
+    //Iniciar o Jogo
     initializeGame();
 })
