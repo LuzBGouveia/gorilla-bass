@@ -24,37 +24,30 @@ body {
     text-align: center;
 }
 
-.chars {
-    justify-content: space-between;
-    gap: 100rem;
-}
-
-.chars div {
-    display: inline-block;
-}
-
-picture img {
-    min-width: 5px;
-    max-width: 15rem;
-}
-
-.status-acoes {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
+.animation {
+    max-width: 155rem;
+    height: 100%;
+    margin: 1rem auto;
     background-color: #2d4a2d;
     border-radius: 10px;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
 }
 
-.status-acoes .game-status {
+.chars {
     display: flex;
+    justify-content: space-around;
+    
 }
 
-.animation {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
+picture img {
+    min-width: 1rem;
+    max-width: 15rem;
+}
+
+.status-acoes {
+    max-width: 155rem;
+    margin: 1rem auto;
+    padding: 1rem;
     background-color: #2d4a2d;
     border-radius: 10px;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
@@ -70,8 +63,8 @@ h1 {
 .game-status {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 30px;
-    gap: 20px;
+    margin-bottom: 2rem;
+    gap: 1rem;
 }
 
 .gorilla-status, .humans-status {
@@ -203,6 +196,9 @@ h1 {
 }
 
 @media (max-width: 768px) {
+    body {
+        overflow: hidden;
+    }
     .game-status {
         flex-direction: column;
     }
@@ -215,8 +211,47 @@ h1 {
         flex-direction: column;
     }
     
-    .humans-grid {
-        grid-template-columns: repeat(5, 1fr);
+    picture img {
+    min-width: 0.3rem;
+    max-width: 5rem;
+    }
+}
+
+@media (max-height: 768px) {
+    .game-status {
+        flex-direction: column;
+    }
+    
+    .humans-status {
+        max-width: 100%;
+        
+    }
+    
+    .controls {
+        flex-direction: column;
+    }
+    
+    picture img {
+        min-width: 0.3rem;
+        max-width: 5rem;
+    }
+
+    .controls {
+        display: block;
+        justify-content: space-evenly;
+        gap: 0.3rem;
+        margin-bottom: 1px;
+    }
+
+    .btn {
+        display: inline;
+        width: 10rem;
+        padding: 3px 2px;
+        border: none;
+        border-radius: 5px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.2s;
     }
 }
 
