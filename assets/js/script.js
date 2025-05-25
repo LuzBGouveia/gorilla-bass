@@ -1,6 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
-    //Elementos DOM
-    const mainGorillaImg = document.getElementById('main-gorilla-img');
+    // --- Elementos DOM (CONFIRA SE CORRESPONDEM AO SEU HTML) ---
+    const mainGorillaImgStatus = document.getElementById('main-gorilla-img');
+    const arenaGorillaImg = document.getElementById('arena-gorilla-img');
+    const arenaHumanImg = document.getElementById('arena-human-img');
+    const gorillaImageToAnimate = arenaGorillaImg || mainGorillaImgStatus; // Prioriza arena
 
     const gorillaHealthProgress = document.getElementById('gorilla-health-progress');
     const gorillaHealthText = document.getElementById('gorilla-health-text');
@@ -11,168 +14,54 @@ document.addEventListener('DOMContentLoaded', () => {
     const gorillaAttacksCountText = document.getElementById('gorilla-attacks-count');
 
     const humansRemainingText = document.getElementById('humans-remaining-text');
-    const humansGridContainer = document.getElementById('humans-grid-container');
+    const humanRepresentativesContainer = document.getElementById('human-representatives-container');
 
     const attackBtn = document.getElementById('attack-btn');
     const defendBtn = document.getElementById('defend-btn');
-    const resetBtn = document.getElementById('reset-btn');
+    const restBtn = document.getElementById('rest-btn');
+    const mainRestartBtn = document.getElementById('restart-btn'); // Botão nos controles
 
     const logEntriesContainer = document.getElementById('log-entries-container');
 
     const gameOverSection = document.getElementById('game-over-section');
     const gameOverMessage = document.getElementById('game-over-message');
-    const restartBtn = document.getElementById('restart-btn');
+    const restartGameBtnGameOver = document.getElementById('restart-game-btn'); // Botão no game over
 
-    // Constantes do jogo
-    const MAX_GORILLA_HEALTH = 100;
-    const MAX_GORILLA_ENERGY = 50;
-    const MAX_GORILLA_DEFENSE_BONUS = 30;
-    const TOTAL_HUMANS = 100;
-
-    const ATTACK_ENERGY_COST = 10;
-    const DEFEND_ENERGY_COST = 15; // Custo para defender
-    const DEFEND_BONUS_GAIN = 10; // Ganho de bônus de defesa
-    const REST_ENERGY_GAIN = 20;  // Ganho de energia ao descansar
-
-    const HUMANS_TO_ATTACK_MIN = 2; // Gorila ataca no mínimo X humanos
-    const HUMANS_TO_ATTACK_MAX = 5; // Gorila ataca no máximo X humanos
-
-    const HUMANS_ATTACK_POWER_MIN = 1;
-    const HUMANS_ATTACK_POWER_MAX = 2;
-    const HUMANS_ATTACK_CHANCE_PER_HUMAN_GROUP = 0.25; // 25% de chance de um grupo de humanos atacar
-    const NUM_HUMANS_IN_ATTACKING_GROUP = 5; // Quantos humanos atacam juntos como um "grupo"
-
-    //Variáveis de estado do jogo
-    let gorillaState = {
-        health: MAX_GORILLA_HEALTH,
-        energy: MAX_GORILLA_ENERGY,
-        defenseBonus: 0,
-        attacksMade: 0
+    // --- Áudio ---
+    const sounds = {
+        gorillaAttack: document.getElementById('sound-gorilla-attack'),
+        gorillaHurt: document.getElementById('sound-gorilla-hurt'),
+        humanAttack: document.getElementById('sound-human-attack'),
+        humanDie: document.getElementById('sound-human-die'),
+        gorillaDefend: document.getElementById('sound-gorilla-defend'),
+        gorillaRest: document.getElementById('sound-gorilla-rest'),
+        gameWin: document.getElementById('sound-game-win'),
+        gameLose: document.getElementById('sound-game-lose')
     };
 
-    let humansArray = [];
-    let humansAliveCount = TOTAL_HUMANS;
+    // --- Constantes ---
+    const MAX_GORILLA_HEALTH = 100, MAX_GORILLA_ENERGY = 50, MAX_GORILLA_DEFENSE_BONUS = 30;
+    const TOTAL_HUMANS = 100, NUM_REPRESENTATIVE_IMAGES = 10;
+    const HUMANS_PER_REPRESENTATIVE = TOTAL_HUMANS / NUM_REPRESENTATIVE_IMAGES;
+    const ATTACK_ENERGY_COST = 10, DEFEND_ENERGY_COST = 15, DEFEND_BONUS_GAIN = 10, REST_ENERGY_GAIN = 20;
+    const GORILLA_ATTACK_POWER_MIN = HUMANS_PER_REPRESENTATIVE * 1, GORILLA_ATTACK_POWER_MAX = HUMANS_PER_REPRESENTATIVE * 3;
+    const HUMANS_ATTACK_POWER_MIN = 5, HUMANS_ATTACK_POWER_MAX = 15, HUMANS_ATTACK_CHANCE = 0.75;
 
-    let currentPlayerTurn = 'gorilla'; // 'gorilla' ou 'humans'
-    let isAnimating = false; // Trava ações durante animações
-    let isGameOver = false;
+    // --- Estado do Jogo ---
+    let gorillaState, humansAliveCount, representativeHumans;
+    let currentPlayerTurn, isAnimating, isGameOver;
 
-    //Inicialização do jogo
-    function initializeGame() { 
-        // Tenta carregar o estado salvo
-        if (loadGameState()) {
-            // Se carregou, verifica se o jogo já tinha acabado
-            if (gorillaState.health <= 0 || humansAliveCount <= 0) {
-                resetGameVariables(); // Reseta para um novo jogo se o carregado estava "game over"
-            }
-        } else {
-            resetGameVariables(); // Se não carregou, reseta para um novo jogo
-        }
-
-        isGameOver = false; // Garante que não está game over
-        currentPlayerTurn = 'gorilla';
-        isAnimating = false;
-
-        updateGorillaStatusDisplay();
-        renderHumans(); // Renderiza os humanos (pode ser otimizado se já estão no DOM do save)
-        updateHumansRemainingDisplay();
-        clearLog();
-        addLogEntry("A Batalha Começa! Turno do Gorila.", "system");
-        gameOverSection.style.display = 'none';
-        enableActionButtons(true);
-    }
-
-    function resetGameVariables() {
-        gorillaState = {
-            health: MAX_GORILLA_HEALTH,
-            energy: MAX_GORILLA_ENERGY,
-            defenseBonus: 0,
-            attacksMade: 0
-        };
-        humansAliveCount = TOTAL_HUMANS;
-        initializeHumansArray(); // Cria o array de humanos
-    }
-
-    function initializeHumansArray() {
-        humansArray = [];
-        for (let i = 0; i < TOTAL_HUMANS; i++) {
-            // Cada humano é um objeto com 'id' e 'alive'
-            humansArray.push({ id: i, alive: true });
+    // --- Funções Auxiliares ---
+    function playSound(soundElement) {
+        if (soundElement && typeof soundElement.play === 'function') {
+            soundElement.currentTime = 0;
+            soundElement.play().catch(e => console.warn("Falha ao tocar som:", soundElement.id, e));
         }
     }
 
-    //Atualizações de Display
-    function updateGorillaStatusDisplay() {
-        gorillaHealthProgress.value = gorillaState.health;
-        gorillaHealthProgress.max = MAX_GORILLA_HEALTH;
-        gorillaHealthText.textContent = `${gorillaState.health}/${MAX_GORILLA_HEALTH}`;
-
-        gorillaEnergyProgress.value = gorillaState.energy;
-        gorillaEnergyProgress.max = MAX_GORILLA_ENERGY;
-        gorillaEnergyText.textContent = `${gorillaState.energy}/${MAX_GORILLA_ENERGY}`;
-
-        gorillaDefenseProgress.value = gorillaState.defenseBonus;
-        gorillaDefenseProgress.max = MAX_GORILLA_DEFENSE_BONUS;
-        gorillaDefenseText.textContent = `${gorillaState.defenseBonus}`;
-        
-        gorillaAttacksCountText.textContent = gorillaState.attacksMade;
-
-        // Adicionar classes 'low' se necessário (requer CSS)
-        gorillaHealthProgress.classList.toggle('low-health', gorillaState.health < MAX_GORILLA_HEALTH * 0.3);
-        gorillaEnergyProgress.classList.toggle('low-energy', gorillaState.energy < MAX_GORILLA_ENERGY * 0.3);
-    }
-
-    function renderHumans() {
-        humansGridContainer.innerHTML = ''; // Limpa a grade
-        humansArray.forEach(human => {
-            const humanDiv = document.createElement('div');
-            humanDiv.classList.add('human'); // Classe base do seu CSS
-            humanDiv.dataset.humanId = human.id; // Para identificar o humano
-            if (human.alive) {
-                humanDiv.classList.add('alive');
-                // Adicionar imagem de humano vivo se desejar, ou deixar o CSS cuidar disso
-            } else {
-                humanDiv.classList.add('dead');
-                // Adicionar "X" ou imagem de humano morto
-            }
-            humansGridContainer.appendChild(humanDiv);
-        });
-        updateHumansRemainingDisplay();
-    }
-
-    function updateHumansRemainingDisplay() {
-        humansRemainingText.textContent = humansAliveCount;
-    }
-
-    // --- Log de Batalha ---
-    function addLogEntry(message, type = "info") {
-        const logEntry = document.createElement('div');
-        logEntry.classList.add('log-entry'); // Classe base do seu CSS
-        logEntry.classList.add(type); // Para estilização: 'gorilla', 'human', 'system'
-        
-        // Adicionar timestamp
-        const timestamp = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        logEntry.innerHTML = `<span>[${timestamp}]</span> ${message}`; // innerHTML para permitir spans se necessário
-
-        logEntriesContainer.prepend(logEntry); // Adiciona no topo
-        // Limitar o número de logs
-        while (logEntriesContainer.children.length > 30) {
-            logEntriesContainer.removeChild(logEntriesContainer.lastChild);
-        }
-    }
-    function clearLog() {
-        logEntriesContainer.innerHTML = '';
-    }
-
-    //Funções de Animação (Exemplos)
-    // Estas funções agora retornam Promises para usar com async/await
     function animate(element, animationClass, duration = 500) {
         return new Promise(resolve => {
-            if (!element) {
-                console.warn("Elemento para animar não encontrado:", element);
-                resolve();
-                return;
-            }
+            if (!element) { resolve(); return; }
             element.classList.add(animationClass);
             setTimeout(() => {
                 element.classList.remove(animationClass);
@@ -180,332 +69,420 @@ document.addEventListener('DOMContentLoaded', () => {
             }, duration);
         });
     }
+
+    // --- Inicialização e Reset ---
+    function initializeGame() {
+        console.log("INIT: Iniciando jogo...");
+        loadGameState(); // Tenta carregar, se falhar, resetGameVariables é chamado internamente por loadGameState ou aqui
+
+        // Se o jogo carregado estava 'game over', loadGameState já terá chamado triggerGameOver.
+        // Se não estava 'game over' ou é um novo jogo, resetamos explicitamente alguns estados de controle de turno.
+        if (!isGameOver) { // Só faz isso se não estivermos já numa tela de game over vinda do load
+            isGameOver = false;
+            currentPlayerTurn = 'gorilla';
+            isAnimating = false;
+            clearLog();
+            addLogEntry("A Batalha Começa! Turno do Gorila.", "system");
+        }
+        
+        updateAllDisplays(); // Atualiza todos os displays
+        if (gameOverSection) gameOverSection.style.display = isGameOver ? 'block' : 'none';
+        enableActionButtons(!isGameOver); // Habilita se não for game over
+        console.log("INIT: Jogo inicializado. Turno:", currentPlayerTurn, "Animating:", isAnimating, "GameOver:", isGameOver);
+    }
+
+    function resetGameVariables() {
+        console.log("RESET: Resetando variáveis do jogo.");
+        gorillaState = { health: MAX_GORILLA_HEALTH, energy: MAX_GORILLA_ENERGY, defenseBonus: 0, attacksMade: 0 };
+        humansAliveCount = TOTAL_HUMANS;
+        representativeHumans = Array.from({ length: NUM_REPRESENTATIVE_IMAGES }, (_, i) => ({
+            id: i, alive: true, health: HUMANS_PER_REPRESENTATIVE
+        }));
+    }
     
-    async function animateGorillaAction(animationType = 'attack-animation', duration = 500) {
-        isAnimating = true;
-        // Adicionar aqui a lógica para tocar som se desejar
-        await animate(mainGorillaImg, animationType, duration);
-        // isAnimating será setado para false pela função que chamou esta, após todas as suas operações.
+    function updateAllDisplays() {
+        updateGorillaStatusDisplay();
+        renderRepresentativeHumans();
+        updateHumansRemainingDisplay();
     }
 
-    async function animateHumansDefeated(defeatedHumanElements) {
-        if (!defeatedHumanElements || defeatedHumanElements.length === 0) return;
-        isAnimating = true; // Garante que está travado
-        for (const humanEl of defeatedHumanElements) {
-            humanEl.classList.remove('alive');
-            humanEl.classList.add('dead'); // Classe 'dead' do seu CSS deve dar o visual de derrotado
-            await animate(humanEl, 'human-defeat-animation', 300); // Crie 'human-defeat-animation' no CSS
+    // --- Atualizações de Display ---
+    function updateGorillaStatusDisplay() {
+        if (gorillaHealthProgress) gorillaHealthProgress.value = gorillaState.health;
+        if (gorillaHealthText) gorillaHealthText.textContent = `${gorillaState.health}/${MAX_GORILLA_HEALTH}`;
+        if (gorillaEnergyProgress) gorillaEnergyProgress.value = gorillaState.energy;
+        if (gorillaEnergyText) gorillaEnergyText.textContent = `${gorillaState.energy}/${MAX_GORILLA_ENERGY}`;
+        if (gorillaDefenseProgress) gorillaDefenseProgress.value = gorillaState.defenseBonus;
+        if (gorillaDefenseText) gorillaDefenseText.textContent = `${gorillaState.defenseBonus}`;
+        if (gorillaAttacksCountText) gorillaAttacksCountText.textContent = gorillaState.attacksMade;
+        if (gorillaHealthProgress) gorillaHealthProgress.classList.toggle('low-health', gorillaState.health < MAX_GORILLA_HEALTH * 0.3);
+        if (gorillaEnergyProgress) gorillaEnergyProgress.classList.toggle('low-energy', gorillaState.energy < MAX_GORILLA_ENERGY * 0.3);
+    }
+
+    function renderRepresentativeHumans() {
+        if (!humanRepresentativesContainer) return;
+        humanRepresentativesContainer.innerHTML = '';
+        representativeHumans.forEach(rep => {
+            const repImg = document.createElement('img');
+            repImg.src = "./assets/img/humano.png";
+            repImg.alt = `Grupo de Humanos ${rep.id + 1}`;
+            repImg.classList.add('human-representative-img');
+            repImg.dataset.representativeId = rep.id;
+            if (!rep.alive) repImg.classList.add('defeated');
+            humanRepresentativesContainer.appendChild(repImg);
+        });
+    }
+
+    function updateHumansRemainingDisplay() {
+        if (humansRemainingText) humansRemainingText.textContent = Math.max(0, humansAliveCount); // Garante que não seja negativo
+    }
+
+    // --- Log de Batalha ---
+    function addLogEntry(message, type = "info") {
+        if (!logEntriesContainer) { console.error("Elemento do Log não encontrado!"); return; }
+        console.log(`LOG [${type.toUpperCase()}]: ${message}`); // Log no console para depuração
+
+        const logEntry = document.createElement('div');
+        logEntry.classList.add('log-entry', `log-entry-${type}`); // Adiciona classe base e tipo
+        
+        const timestampSpan = document.createElement('span');
+        timestampSpan.className = 'log-timestamp';
+        timestampSpan.textContent = `[${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) }] `;
+        
+        logEntry.appendChild(timestampSpan);
+        logEntry.appendChild(document.createTextNode(message));
+
+        logEntriesContainer.prepend(logEntry);
+        while (logEntriesContainer.children.length > 50) { // Aumentei um pouco o limite do log
+            logEntriesContainer.removeChild(logEntriesContainer.lastChild);
+        }
+    }
+    function clearLog() {
+        if (logEntriesContainer) logEntriesContainer.innerHTML = '';
+    }
+
+    // --- Animações de Combate ---
+    async function animateGorillaActionEffect(animationType = 'attack-animation', duration = 600) {
+        if (gorillaImageToAnimate) await animate(gorillaImageToAnimate, animationType, duration);
+    }
+    
+    async function animateRepresentativeDefeat(representativeElement) {
+        if (representativeElement) {
+            await animate(representativeElement, 'hit-by-gorilla', 300);
+            representativeElement.classList.add('defeated');
+            playSound(sounds.humanDie);
         }
     }
     
-    async function animateGorillaDamage(damageAmount) {
-        isAnimating = true;
-        await animate(mainGorillaImg, 'shake', 700); // 'shake' é do seu CSS
-
-        // Mostrar texto de dano flutuante (opcional, requer CSS para .damage-float)
-        if (damageAmount > 0 && mainGorillaImg.parentElement) {
-            const damageTextEl = document.createElement('div');
-            damageTextEl.textContent = `-${damageAmount}`;
-            damageTextEl.className = 'damage-float'; // Estilize .damage-float no CSS
-            mainGorillaImg.parentElement.style.position = 'relative'; // Para posicionamento absoluto
-            mainGorillaImg.parentElement.appendChild(damageTextEl);
-            setTimeout(() => damageTextEl.remove(), 1000); // Remove após 1s
+    async function animateGorillaDamageEffect(damageAmount) {
+        if (gorillaImageToAnimate) await animate(gorillaImageToAnimate, 'shake', 700);
+        playSound(sounds.gorillaHurt);
+        if (damageAmount > 0 && gorillaImageToAnimate) {
+            const parentForDamageFloat = gorillaImageToAnimate.closest('.gorilla-main-figure, .fighter') || gorillaImageToAnimate.parentElement;
+            if (parentForDamageFloat) {
+                parentForDamageFloat.style.position = 'relative';
+                const damageTextEl = document.createElement('div');
+                damageTextEl.textContent = `-${damageAmount}`;
+                damageTextEl.className = 'damage-float';
+                parentForDamageFloat.appendChild(damageTextEl);
+                setTimeout(() => damageTextEl.remove(), 1000);
+            }
         }
-        // isAnimating será setado para false pela função que chamou esta
     }
 
-    //Ações do Gorila
-    attackBtn.addEventListener('click', async () => {
-        if (isGameOver || isAnimating || currentPlayerTurn !== 'gorilla' || gorillaState.energy < ATTACK_ENERGY_COST) {
-            if (gorillaState.energy < ATTACK_ENERGY_COST && !isAnimating && currentPlayerTurn === 'gorilla') {
-                addLogEntry("Gorila com pouca energia para atacar!", "system");
-                await animate(mainGorillaImg, 'shake', 300);
+    // --- Ações do Gorila ---
+    async function handleGorillaAction(actionLogic, sound, logMessage, animation, energyCost, passTurnArgs = [true]) {
+        console.log(`ACTION: Tentando ${logMessage}. Animando: ${isAnimating}, Turno: ${currentPlayerTurn}, Energia: ${gorillaState.energy}, Custo: ${energyCost}`);
+        if (isGameOver || isAnimating || currentPlayerTurn !== 'gorilla' || (energyCost && gorillaState.energy < energyCost)) {
+            if (!isAnimating && currentPlayerTurn === 'gorilla' && energyCost && gorillaState.energy < energyCost) {
+                addLogEntry(`Gorila com pouca energia para ${logMessage.toLowerCase().split(' ')[0]}!`, "system");
+                if (gorillaImageToAnimate) await animate(gorillaImageToAnimate, 'shake', 300);
             }
             return;
         }
-        
-        isAnimating = true; // Bloqueia outras ações
+
+        isAnimating = true; // TRAVA AQUI
         enableActionButtons(false);
 
-        gorillaState.energy -= ATTACK_ENERGY_COST;
-        gorillaState.attacksMade++;
+        if (energyCost) {
+            gorillaState.energy -= energyCost;
+        }
+        gorillaState.attacksMade += (logMessage.includes("ATAQUE") ? 1 : 0); // Só incrementa se for ataque
         updateGorillaStatusDisplay();
+        playSound(sound);
+        addLogEntry(logMessage, "gorilla");
+        if (animation) await animateGorillaActionEffect(animation.type, animation.duration);
 
-        addLogEntry("Gorila se prepara para o ATAQUE!", "gorilla");
-        await animateGorillaAction('attack-animation', 600); // Sua classe CSS 'attack-animation'
+        await actionLogic(); // Executa a lógica específica da ação (ex: causar dano)
 
-        let numHumansToAttack = Math.floor(Math.random() * (HUMANS_TO_ATTACK_MAX - HUMANS_TO_ATTACK_MIN + 1)) + HUMANS_TO_ATTACK_MIN;
-        let humansDefeatedThisTurn = 0;
-        const defeatedHumanElementsForAnimation = [];
+        // isAnimating será resetado em endHumansTurn
+        endGorillaTurn(...passTurnArgs);
+    }
 
-        let humanElements = humansGridContainer.querySelectorAll('.human.alive');
-        
-        for (let i = 0; i < numHumansToAttack && i < humanElements.length; i++) {
-            const humanElToDefeat = humanElements[i]; // Pega os primeiros N humanos vivos na grade
-            const humanId = parseInt(humanElToDefeat.dataset.humanId);
-            const humanObj = humansArray.find(h => h.id === humanId);
+    if (attackBtn) attackBtn.addEventListener('click', () => handleGorillaAction(
+        async () => { // actionLogic
+            let damageDealt = Math.floor(Math.random() * (GORILLA_ATTACK_POWER_MAX - GORILLA_ATTACK_POWER_MIN + 1)) + GORILLA_ATTACK_POWER_MIN;
+            let remainingDamageToDeal = damageDealt;
+            let humansDefeatedLog = 0;
 
-            if (humanObj && humanObj.alive) {
-                humanObj.alive = false;
-                humansAliveCount--;
-                humansDefeatedThisTurn++;
-                defeatedHumanElementsForAnimation.push(humanElToDefeat);
+            for (let rep of representativeHumans) {
+                if (rep.alive && remainingDamageToDeal > 0) {
+                    const damageToThisRep = Math.min(rep.health, remainingDamageToDeal);
+                    rep.health -= damageToThisRep;
+                    humansAliveCount -= damageToThisRep;
+                    remainingDamageToDeal -= damageToThisRep;
+                    humansDefeatedLog += damageToThisRep;
+                    if (rep.health <= 0) {
+                        rep.alive = false;
+                        const repElement = humanRepresentativesContainer?.querySelector(`[data-representative-id="${rep.id}"]`);
+                        if(repElement) await animateRepresentativeDefeat(repElement);
+                    }
+                }
             }
-        }
+            humansAliveCount = Math.max(0, humansAliveCount);
+            if (humansDefeatedLog > 0) addLogEntry(`Gorila ATACA e causa ${humansDefeatedLog} de "baixas"!`, "gorilla");
+            else if (humansAliveCount > 0) addLogEntry("Gorila ataca, mas os humanos resistem!", "gorilla");
+            updateHumansRemainingDisplay();
+            renderRepresentativeHumans(); // Atualiza visual dos representantes
+        },
+        sounds.gorillaAttack,
+        "Gorila se prepara para o ATAQUE!",
+        { type: 'attack-animation', duration: 600 },
+        ATTACK_ENERGY_COST
+    ));
 
-        if (humansDefeatedThisTurn > 0) {
-            addLogEntry(`Gorila ATACA e derrota ${humansDefeatedThisTurn} humanos!`, "gorilla");
-            await animateHumansDefeated(defeatedHumanElementsForAnimation);
-        } else if (humansAliveCount > 0) {
-            addLogEntry("Gorila ataca, mas erra todos os humanos restantes!", "gorilla");
-        } else {
-            addLogEntry("Gorila ataca, mas não há mais humanos!", "gorilla");
-        }
-        
-        updateHumansRemainingDisplay(); // Atualiza contador
-        // renderHumans(); // Opcional: se a animação já atualiza o visual, pode não ser necessário
-        
-        isAnimating = false; // Libera após todas as animações de ataque
-        endGorillaTurn();
-    });
+    if (defendBtn) defendBtn.addEventListener('click', () => handleGorillaAction(
+        async () => { // actionLogic
+            gorillaState.defenseBonus = Math.min(MAX_GORILLA_DEFENSE_BONUS, gorillaState.defenseBonus + DEFEND_BONUS_GAIN);
+            updateGorillaStatusDisplay(); // Atualiza o display da defesa
+             addLogEntry(`Bônus de Defesa aumentado para ${gorillaState.defenseBonus}.`, "gorilla");
+        },
+        sounds.gorillaDefend,
+        "Gorila assume postura DEFENSIVA!",
+        { type: 'defense-animation', duration: 800 },
+        DEFEND_ENERGY_COST
+    ));
 
-    defendBtn.addEventListener('click', async () => {
-        if (isGameOver || isAnimating || currentPlayerTurn !== 'gorilla' || gorillaState.energy < DEFEND_ENERGY_COST) {
-             if (gorillaState.energy < DEFEND_ENERGY_COST && !isAnimating && currentPlayerTurn === 'gorilla') {
-                addLogEntry("Gorila com pouca energia para defender!", "system");
-                 await animate(mainGorillaImg, 'shake', 300);
+    if (restBtn) restBtn.addEventListener('click', () => handleGorillaAction(
+        async () => { // actionLogic
+            const energyGained = Math.min(REST_ENERGY_GAIN, MAX_GORILLA_ENERGY - gorillaState.energy);
+            if (energyGained > 0) {
+                gorillaState.energy += energyGained;
+                updateGorillaStatusDisplay();
+                addLogEntry(`Gorila recupera ${energyGained} de energia. Energia atual: ${gorillaState.energy}.`, "gorilla");
+            } else {
+                addLogEntry("Gorila tenta descansar, mas já está com energia máxima!", "system");
             }
-            return;
-        }
-        isAnimating = true;
-        enableActionButtons(false);
+        },
+        sounds.gorillaRest,
+        "Gorila DESCANSA...",
+        { type: 'rest-animation', duration: 1000 },
+        0, // Sem custo de energia para descansar
+        [false] // humansShouldAttack = false
+    ));
 
-        gorillaState.energy -= DEFEND_ENERGY_COST;
-        gorillaState.defenseBonus = Math.min(MAX_GORILLA_DEFENSE_BONUS, gorillaState.defenseBonus + DEFEND_BONUS_GAIN);
-        updateGorillaStatusDisplay();
-        
-        addLogEntry(`Gorila assume postura DEFENSIVA! (Bônus Defesa: +${DEFEND_BONUS_GAIN})`, "gorilla");
-        await animateGorillaAction('defense-animation', 800); // Crie 'defense-animation' no CSS (ex: brilho azul)
-
-        isAnimating = false;
-        endGorillaTurn();
-    });
-
-    resetBtn.addEventListener('click', async () => { // Assumindo que o botão de curar é para descansar/energia
-        if (isGameOver || isAnimating || currentPlayerTurn !== 'gorilla') {
-            return;
-        }
-        isAnimating = true;
-        enableActionButtons(false);
-
-        const energyGained = Math.min(REST_ENERGY_GAIN, MAX_GORILLA_ENERGY - gorillaState.energy);
-        if (energyGained > 0) {
-            gorillaState.energy += energyGained;
-            updateGorillaStatusDisplay();
-            addLogEntry(`Gorila DESCANSA e recupera ${energyGained} de energia.`, "gorilla");
-            await animateGorillaAction('rest-animation', 1000); // Crie 'rest-animation' (ex: brilho verde suave)
-        } else {
-            addLogEntry("Gorila tenta descansar, mas já está com energia máxima!", "system");
-            await new Promise(resolve => setTimeout(resolve, 500)); // Pequena pausa
-        }
-        
-        isAnimating = false;
-        endGorillaTurn(false); // Humanos não atacam se o gorila apenas descansou (opcional)
-    });
-
-    //Lógica de Turno
+    // --- Lógica de Turno ---
     function endGorillaTurn(humansShouldAttack = true) {
-        if (checkGameEndConditions()) return;
+        console.log(`END GORILLA TURN: humansShouldAttack: ${humansShouldAttack}. GameOver: ${isGameOver}`);
+        saveGameState(); // Salva o estado após a ação do gorila
+        if (checkGameEndConditions()) { // Verifica se o gorila venceu
+            // isAnimating já deve ser true aqui, triggerGameOver vai setar para false.
+            // enableActionButtons(false) será chamado por triggerGameOver
+            return;
+        }
 
         currentPlayerTurn = 'humans';
         addLogEntry("Turno dos Humanos...", "system");
-        enableActionButtons(false); // Desabilita botões do gorila durante turno humano
+        // enableActionButtons(false); // Já desabilitado pela ação do gorila
 
         if (humansShouldAttack && humansAliveCount > 0) {
-            setTimeout(humansTurnAction, 1200); // Atraso para dar tempo de ler o log
+            setTimeout(humansTurnAction, 1200);
         } else {
-            if (humansAliveCount <=0) {
-                addLogEntry("Todos os humanos foram derrotados!", "system");
-            } else {
-                addLogEntry("Humanos observam cautelosamente...", "human");
+            if (humansAliveCount <= 0 && !isGameOver) { // Loga apenas se o jogo não acabou de terminar
+                // Esta condição deve ser pega por checkGameEndConditions antes
+            } else if (!isGameOver) {
+                 addLogEntry("Humanos observam cautelosamente...", "human");
             }
+            // Mesmo se não atacarem, finalizamos o ciclo para resetar flags e passar o turno
             setTimeout(endHumansTurn, 1000);
         }
     }
 
     async function humansTurnAction() {
+        console.log("HUMANS TURN: Iniciando ação dos humanos.");
+        // isAnimating já foi setado para true pela ação do gorila.
+
         if (isGameOver || humansAliveCount <= 0) {
-            endHumansTurn(); // Garante a transição de volta
+            endHumansTurn(); // Leva ao reset de isAnimating e troca de turno
             return;
         }
-        isAnimating = true; // Bloqueia qualquer interação acidental
 
-        let actualAttackingHumans = 0;
-        let totalPotentialDamage = 0;
+        if (Math.random() < HUMANS_ATTACK_CHANCE) {
+            playSound(sounds.humanAttack);
+            addLogEntry(`Humanos se preparam para o ATAQUE!`, "human");
+            if (arenaHumanImg) await animate(arenaHumanImg, 'attack-animation', 500); // Animação do humano na arena
+            await new Promise(resolve => setTimeout(resolve, 1000));
 
-        // Simula grupos de humanos atacando
-        const numberOfGroups = Math.ceil(humansAliveCount / NUM_HUMANS_IN_ATTACKING_GROUP);
-        for (let i = 0; i < numberOfGroups; i++) {
-            if (Math.random() < HUMANS_ATTACK_CHANCE_PER_HUMAN_GROUP) {
-                // Este grupo ataca
-                const humansInThisAttackingWave = Math.min(NUM_HUMANS_IN_ATTACKING_GROUP, humansAliveCount - (actualAttackingHumans * NUM_HUMANS_IN_ATTACKING_GROUP)); //não lembro disso
-                
-                for(let j = 0; j < humansInThisAttackingWave; j++) {
-                    totalPotentialDamage += Math.floor(Math.random() * (HUMANS_ATTACK_POWER_MAX - HUMANS_ATTACK_POWER_MIN + 1)) + HUMANS_ATTACK_POWER_MIN;
-                    actualAttackingHumans++; // Conta cada humano individualmente para o log de dano
-                }
-            }
-        }
+            let potentialDamage = Math.floor(Math.random() * (HUMANS_ATTACK_POWER_MAX - HUMANS_ATTACK_POWER_MIN + 1)) + HUMANS_ATTACK_POWER_MIN;
+            const damageAbsorbed = Math.min(potentialDamage, gorillaState.defenseBonus);
+            const damageTaken = Math.max(0, potentialDamage - gorillaState.defenseBonus);
 
-
-        if (actualAttackingHumans === 0) {
-            addLogEntry("Humanos decidem não atacar desta vez.", "human");
-            await new Promise(resolve => setTimeout(resolve, 1000)); // Pausa para leitura
-        } else {
-            addLogEntry(`${actualAttackingHumans} Humanos avançam para o ATAQUE!`, "human");
-            // Animação dos humanos atacando (pode ser um flash nos ícones deles ou um som)
-            // await animate(humansGridContainer, 'humans-attack-prep-animation', 500); // Crie esta animação
-
-            await new Promise(resolve => setTimeout(resolve, 800)); // Pausa antes do impacto
-
-            const damageAbsorbedByDefense = Math.min(totalPotentialDamage, gorillaState.defenseBonus);
-            const damageTakenByGorilla = Math.max(0, totalPotentialDamage - gorillaState.defenseBonus);
-
-            gorillaState.health = Math.max(0, gorillaState.health - damageTakenByGorilla);
+            gorillaState.health = Math.max(0, gorillaState.health - damageTaken);
             
-            if (damageTakenByGorilla > 0) {
-                addLogEntry(`Gorila é atingido e sofre ${damageTakenByGorilla} de dano! (Defendido: ${damageAbsorbedByDefense})`, "human");
-                await animateGorillaDamage(damageTakenByGorilla);
-            } else if (totalPotentialDamage > 0) {
-                addLogEntry("Os ataques dos humanos são totalmente bloqueados pela defesa do Gorila!", "human");
-                // Animação de defesa bem-sucedida no gorila (ex: escudo piscando)
-                await animate(mainGorillaImg, 'defense-success-animation', 600); // Crie esta animação
+            if (damageTaken > 0) {
+                addLogEntry(`Gorila é atingido e sofre ${damageTaken} de dano! (Defendido: ${damageAbsorbed})`, "human");
+                await animateGorillaDamageEffect(damageTaken);
+            } else if (potentialDamage > 0) {
+                addLogEntry("O ataque dos humanos é totalmente bloqueado pela defesa do Gorila!", "human");
+                if(gorillaImageToAnimate) await animate(gorillaImageToAnimate, 'defense-success-animation', 600);
             } else {
-                addLogEntry("Os humanos tentam atacar, mas não causam nenhum dano.", "human");
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                addLogEntry("Humanos tentam um ataque, mas falham em causar impacto!", "human");
+                await new Promise(resolve => setTimeout(resolve, 800));
             }
             updateGorillaStatusDisplay();
 
-            // Reduzir bônus de defesa se foi usado
-            if (gorillaState.defenseBonus > 0 && damageAbsorbedByDefense > 0) {
-                gorillaState.defenseBonus = Math.max(0, gorillaState.defenseBonus - Math.ceil(DEFEND_BONUS_GAIN / 2)); // Defesa decai
+            if (gorillaState.defenseBonus > 0 && damageAbsorbed > 0) {
+                gorillaState.defenseBonus = Math.max(0, gorillaState.defenseBonus - Math.ceil(DEFEND_BONUS_GAIN / 3));
                 addLogEntry("A defesa bônus do Gorila enfraquece.", "system");
                 updateGorillaStatusDisplay();
             }
+        } else {
+            addLogEntry("Humanos hesitam e decidem não atacar desta vez.", "human");
+            await new Promise(resolve => setTimeout(resolve, 1000));
         }
         
-        isAnimating = false;
-        endHumansTurn();
+        endHumansTurn(); // Finaliza o turno dos humanos e reseta isAnimating
     }
 
     function endHumansTurn() {
-        if (checkGameEndConditions()) return;
+        console.log("END HUMANS TURN: Finalizando turno dos humanos.");
+        isAnimating = false; // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< PONTO CRÍTICO PARA DESTRAVAR
+        saveGameState(); // Salva o estado após o turno dos humanos
+        
+        if (checkGameEndConditions()) { // Verifica se os humanos venceram
+            enableActionButtons(false); // Garante que os botões fiquem desabilitados
+            return;
+        }
         
         currentPlayerTurn = 'gorilla';
         addLogEntry("Turno do Gorila! Prepare sua ação.", "system");
-        enableActionButtons(true);
-        saveGameState(); // Salva o estado no final do turno dos humanos
+        enableActionButtons(true); // Reabilita botões para o gorila
+        console.log("END HUMANS TURN: Próximo turno do Gorila. Animating:", isAnimating);
     }
 
-    //Fim de Jogo e Reinício
+    // --- Fim de Jogo e Reinício ---
     function checkGameEndConditions() {
-        if (isGameOver) return true; // Já terminou
-
+        if (isGameOver) return true;
         if (gorillaState.health <= 0) {
-            triggerGameOver("Os humanos venceram! O Gorila foi derrotado.");
-            return true;
+            triggerGameOver("Os humanos venceram! O Gorila foi derrotado.", sounds.gameLose); return true;
         }
         if (humansAliveCount <= 0) {
-            triggerGameOver("O Gorila venceu! Todos os humanos foram eliminados.");
-            return true;
+            triggerGameOver("O Gorila venceu! Todos os humanos foram eliminados.", sounds.gameWin); return true;
         }
         return false;
     }
 
-    function triggerGameOver(message) {
+    function triggerGameOver(message, soundToPlay) {
+        if(isGameOver) return; 
+        // console.log("GAME OVER:", message);
         isGameOver = true;
-        isAnimating = false; // Para qualquer animação
-        currentPlayerTurn = 'none'; // Ninguém joga
+        isAnimating = false; 
+        currentPlayerTurn = 'none';
         enableActionButtons(false);
         
-        gameOverMessage.textContent = message;
-        gameOverSection.style.display = 'block';
-        addLogEntry(message, "system end-game-message"); // Adicionar classe para estilizar se quiser
-
-        //Limpar estado do jogo salvo quando o gorila perde
-        if (gorillaState.health <= 0) {
-            localStorage.removeItem('gorillaBassGameState');
-        }
+        playSound(soundToPlay);
+        if (gameOverMessage) gameOverMessage.textContent = message;
+        if (gameOverSection) gameOverSection.style.display = 'block';
+        addLogEntry(message, "system end-game-message");
+        saveGameState(); 
+    }
+    
+    function fullGameRestart(){
+        console.log("RESTART: Reiniciando o jogo completamente.");
+        localStorage.removeItem(LOCAL_STORAGE_KEY); // Garante que o save anterior seja limpo para um reset total
+        
+        // Força o reset de todas as variáveis de controle de estado ANTES de chamar initializeGame
+        isGameOver = false;
+        isAnimating = false;
+        currentPlayerTurn = undefined; // Para que initializeGame saiba que é um novo começo
+        resetGameVariables(); // Reseta os dados do jogo (vida, energia, humanos)
+        
+        // Agora chama initializeGame, que irá configurar o resto (log, UI, etc.)
+        initializeGame();
     }
 
-    restartBtn.addEventListener('click', () => {
-        addLogEntry("Jogo reiniciado!", "system");
-        localStorage.removeItem('gorillaBassGameState'); // Limpa o save para um novo começo
-        initializeGame(); // Reinicia o jogo do zero
-    });
+    if (restartGameBtnGameOver) restartGameBtnGameOver.addEventListener('click', fullGameRestart);
+    if (mainRestartBtn) mainRestartBtn.addEventListener('click', fullGameRestart);
 
     function enableActionButtons(enable) {
         const canInteract = enable && !isAnimating && currentPlayerTurn === 'gorilla' && !isGameOver;
-        attackBtn.disabled = !canInteract;
-        defendBtn.disabled = !canInteract;
-        resetBtn.disabled = !canInteract;
+        console.log(`UI: enableActionButtons(${enable}) -> canInteract: ${canInteract} (isAnimating: ${isAnimating}, turn: ${currentPlayerTurn}, gameOver: ${isGameOver})`);
+        
+        if(attackBtn) attackBtn.disabled = !canInteract;
+        if(defendBtn) defendBtn.disabled = !canInteract;
+        if(restBtn) restBtn.disabled = !canInteract;
+        if(mainRestartBtn) mainRestartBtn.disabled = isAnimating; // Botão de reiniciar principal pode ser desabilitado durante animações
     }
-
-    //LocalStorage
-    const LOCAL_STORAGE_KEY = 'gorillaBassGameState';
-
+    
+    // --- LocalStorage ---
+    const LOCAL_STORAGE_KEY = 'gorillaBassGameState_v4'; // Nova versão
     function saveGameState() {
-        if (isGameOver && gorillaState.health <= 0) {
-            // Não salva o estado se o gorila perdeu, para permitir um novo jogo ao recarregar
-            localStorage.removeItem(LOCAL_STORAGE_KEY);
-            return;
-        }
         const gameStateToSave = {
-            gorillaState: gorillaState,
-            humansArray: humansArray, // Salva o estado de cada humano
-            humansAliveCount: humansAliveCount,
-            // Não salvar isGameOver como true, ou isAnimating
+            gorillaState, representativeHumans, humansAliveCount, isGameOver
         };
         try {
             localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(gameStateToSave));
-            console.log("Jogo salvo!");
+            console.log("GAME SAVED. GameOver state:", isGameOver);
         } catch (e) {
-            console.error("Erro ao salvar o jogo:", e);
-            addLogEntry("Erro: Não foi possível salvar o progresso do jogo (limite de armazenamento?).", "system");
+            console.error("Erro ao salvar:", e); addLogEntry("Erro ao salvar jogo.", "error");
         }
     }
 
     function loadGameState() {
         const savedGameString = localStorage.getItem(LOCAL_STORAGE_KEY);
-        if (!savedGameString) return false;
+        if (!savedGameString) {
+            console.log("LOAD: Nenhum save encontrado, resetando variáveis.");
+            resetGameVariables(); // Se não há save, reseta para o padrão ANTES de initializeGame
+            return false; // Indica que não carregou, mas resetou para um novo jogo
+        }
 
         try {
             const loadedState = JSON.parse(savedGameString);
-            // Validação básica
-            if (loadedState.gorillaState && loadedState.humansArray && typeof loadedState.humansAliveCount === 'number') {
+            if (loadedState && loadedState.gorillaState && loadedState.representativeHumans && typeof loadedState.humansAliveCount === 'number') {
                 gorillaState = loadedState.gorillaState;
-                humansArray = loadedState.humansArray;
+                representativeHumans = loadedState.representativeHumans;
                 humansAliveCount = loadedState.humansAliveCount;
+                isGameOver = loadedState.isGameOver || false; // Carrega o estado de game over
                 
-                // Ajustar valores para não excederem máximos (caso as constantes do jogo mudem)
+                // Ajustes para garantir consistência com as constantes atuais do jogo
                 gorillaState.health = Math.min(gorillaState.health, MAX_GORILLA_HEALTH);
                 gorillaState.energy = Math.min(gorillaState.energy, MAX_GORILLA_ENERGY);
-                gorillaState.defenseBonus = Math.min(gorillaState.defenseBonus, MAX_GORILLA_DEFENSE_BONUS);
 
-                addLogEntry("Jogo anterior carregado com sucesso!", "system");
-                return true;
-            } else {
-                console.warn("Dados salvos incompletos ou inválidos. Iniciando novo jogo.");
-                localStorage.removeItem(LOCAL_STORAGE_KEY); // Remove dados ruins
-                return false;
+                addLogEntry("Jogo anterior carregado!", "system");
+                console.log("LOAD: Jogo carregado. GameOver:", isGameOver);
+
+                if (isGameOver) {
+                    // Não chama initializeGame(), apenas configura a tela de fim de jogo.
+                    // A mensagem e som já devem ter sido salvos ou podem ser deduzidos.
+                    let msg = gorillaState.health <= 0 ? "Os humanos venceram! O Gorila foi derrotado." : "O Gorila venceu! Todos os humanos foram eliminados.";
+                    let sound = gorillaState.health <= 0 ? sounds.gameLose : sounds.gameWin;
+                    // Chamamos triggerGameOver aqui para mostrar a tela, mas sem tocar o som novamente se já tocou.
+                    // Para simplificar, vamos deixar triggerGameOver tocar o som, mas o ideal seria não se o estado já é game over.
+                    // Por ora, vamos direto para configurar a UI de game over.
+                    if (gameOverMessage) gameOverMessage.textContent = msg;
+                    if (gameOverSection) gameOverSection.style.display = 'block';
+                    enableActionButtons(false); // Garante que os botões de ação estão desabilitados
+                }
+                return true; // Indica que carregou com sucesso
             }
-        } catch (e) {
-            console.error("Erro ao carregar o jogo salvo:", e);
-            localStorage.removeItem(LOCAL_STORAGE_KEY); // Remove dados ruins
-            return false;
-        }
+        } catch (e) { /* ... */ }
+        
+        console.warn("LOAD: Falha ao carregar/parsear save. Resetando variáveis.");
+        localStorage.removeItem(LOCAL_STORAGE_KEY);
+        resetGameVariables(); // Se o save é inválido, reseta
+        return false; // Indica que o save falhou
     }
 
-    //Iniciar o Jogo
+    // --- Iniciar o Jogo ---
     initializeGame();
-})
+});
