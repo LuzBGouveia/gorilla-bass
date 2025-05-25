@@ -42,7 +42,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const HUMANS_ATTACK_CHANCE_PER_HUMAN_GROUP = 0.25; // 25% de chance de um grupo de humanos atacar
     const NUM_HUMANS_IN_ATTACKING_GROUP = 5; // Quantos humanos atacam juntos como um "grupo"
 
-    
+    //Variáveis de estado do jogo
+    let gorillaState = {
+        health: MAX_GORILLA_HEALTH,
+        energy: MAX_GORILLA_ENERGY,
+        defenseBonus: 0,
+        attacksMade: 0
+    };
+
+    let humansArray = [];
+    let humansAliveCount = TOTAL_HUMANS;
+
+    let currentPlayerTurn = 'gorilla'; // 'gorilla' ou 'humans'
+    let isAnimating = false; // Trava ações durante animações
+    let isGameOver = false;
 
     
 })
