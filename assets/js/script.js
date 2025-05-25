@@ -100,4 +100,50 @@ document.addEventListener('DOMContentLoaded', () => {
             humansArray.push({ id: i, alive: true });
         }
     }
+
+    //Atualizações de Display
+    function updateGorillaStatusDisplay() {
+        gorillaHealthProgress.value = gorillaState.health;
+        gorillaHealthProgress.max = MAX_GORILLA_HEALTH;
+        gorillaHealthText.textContent = `${gorillaState.health}/${MAX_GORILLA_HEALTH}`;
+
+        gorillaEnergyProgress.value = gorillaState.energy;
+        gorillaEnergyProgress.max = MAX_GORILLA_ENERGY;
+        gorillaEnergyText.textContent = `${gorillaState.energy}/${MAX_GORILLA_ENERGY}`;
+
+        gorillaDefenseProgress.value = gorillaState.defenseBonus;
+        gorillaDefenseProgress.max = MAX_GORILLA_DEFENSE_BONUS;
+        gorillaDefenseText.textContent = `${gorillaState.defenseBonus}`;
+        
+        gorillaAttacksCountText.textContent = gorillaState.attacksMade;
+
+        // Adicionar classes 'low' se necessário (requer CSS)
+        gorillaHealthProgress.classList.toggle('low-health', gorillaState.health < MAX_GORILLA_HEALTH * 0.3);
+        gorillaEnergyProgress.classList.toggle('low-energy', gorillaState.energy < MAX_GORILLA_ENERGY * 0.3);
+    }
+
+    function renderHumans() {
+        humansGridContainer.innerHTML = ''; // Limpa a grade
+        humansArray.forEach(human => {
+            const humanDiv = document.createElement('div');
+            humanDiv.classList.add('human'); // Classe base do seu CSS
+            humanDiv.dataset.humanId = human.id; // Para identificar o humano
+            if (human.alive) {
+                humanDiv.classList.add('alive');
+                // Adicionar imagem de humano vivo se desejar, ou deixar o CSS cuidar disso
+            } else {
+                humanDiv.classList.add('dead');
+                // Adicionar "X" ou imagem de humano morto
+            }
+            humansGridContainer.appendChild(humanDiv);
+        });
+        updateHumansRemainingDisplay();
+    }
+
+    function updateHumansRemainingDisplay() {
+        humansRemainingText.textContent = humansAliveCount;
+    }
+
+    
+
 })
