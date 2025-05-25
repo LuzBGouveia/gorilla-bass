@@ -144,6 +144,27 @@ document.addEventListener('DOMContentLoaded', () => {
         humansRemainingText.textContent = humansAliveCount;
     }
 
-    
+    // --- Log de Batalha ---
+    function addLogEntry(message, type = "info") {
+        const logEntry = document.createElement('div');
+        logEntry.classList.add('log-entry'); // Classe base do seu CSS
+        logEntry.classList.add(type); // Para estilização: 'gorilla', 'human', 'system'
+        
+        // Adicionar timestamp
+        const timestamp = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        logEntry.innerHTML = `<span>[${timestamp}]</span> ${message}`; // innerHTML para permitir spans se necessário
 
+        logEntriesContainer.prepend(logEntry); // Adiciona no topo
+        // Limitar o número de logs
+        while (logEntriesContainer.children.length > 30) {
+            logEntriesContainer.removeChild(logEntriesContainer.lastChild);
+        }
+    }
+    function clearLog() {
+        logEntriesContainer.innerHTML = '';
+    }
+
+    //Funções de Animação (Exemplos)
+    // Estas funções agora retornam Promises para usar com async/await
+    
 })
