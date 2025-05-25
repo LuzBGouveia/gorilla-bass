@@ -22,12 +22,14 @@ body {
 .game {
     width: auto;
     text-align: center;
+    display: flex;
+    flex-direction: column;
 }
 
 .animation {
     max-width: 155rem;
-    height: 100%;
-    margin: 1rem auto;
+    height: fit-parent;
+    margin: 1rem;
     background-color: #2d4a2d;
     border-radius: 10px;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
@@ -46,7 +48,7 @@ picture img {
 
 .status-acoes {
     max-width: 155rem;
-    margin: 1rem auto;
+    margin: 1rem ;
     padding: 1rem;
     background-color: #2d4a2d;
     border-radius: 10px;
@@ -217,18 +219,15 @@ h1 {
     }
 }
 
-@media (max-height: 768px) {
+@media (max-height: 845px) {
     .game-status {
         flex-direction: column;
     }
     
-    .humans-status {
+    .gorilla-status, .humans-status {
+        padding: 0.1rem;
         max-width: 100%;
         
-    }
-    
-    .controls {
-        flex-direction: column;
     }
     
     picture img {
@@ -237,21 +236,23 @@ h1 {
     }
 
     .controls {
+        flex-wrap: wrap;
         display: block;
-        justify-content: space-evenly;
-        gap: 0.3rem;
-        margin-bottom: 1px;
+        height: auto;
+        margin-bottom: 0px;
     }
 
     .btn {
         display: inline;
-        width: 10rem;
-        padding: 3px 2px;
+        text-align: center;
+        height: 3rem;
+        padding: 0.1rem 0.2rem;
         border: none;
         border-radius: 5px;
         font-weight: bold;
         cursor: pointer;
         transition: all 0.2s;
+        width: 6rem;
     }
 }
 
