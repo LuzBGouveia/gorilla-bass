@@ -166,5 +166,128 @@ document.addEventListener('DOMContentLoaded', () => {
 
     //Funções de Animação (Exemplos)
     // Estas funções agora retornam Promises para usar com async/await
+    function animate(element, animationClass, duration = 500) {
+        return new Promise(resolve => {
+            if (!element) {
+                console.warn("Elemento para animar não encontrado:", element);
+                resolve();
+                return;
+            }
+            element.classList.add(animationClass);
+            setTimeout(() => {
+                element.classList.remove(animationClass);
+                resolve();
+            }, duration);
+        });
+    }
     
+    async function animateGorillaAction(animationType = 'attack-animation', duration = 500) {
+        isAnimating = true;
+        // Adicionar aqui a lógica para tocar som se desejar
+        await animate(mainGorillaImg, animationType, duration);
+        // isAnimating será setado para false pela função que chamou esta, após todas as suas operações.
+    }
+
+    async function animateHumansDefeated(defeatedHumanElements) {
+        if (!defeatedHumanElements || defeatedHumanElements.length === 0) return;
+        isAnimating = true; // Garante que está travado
+        for (const humanEl of defeatedHumanElements) {
+            humanEl.classList.remove('alive');
+            humanEl.classList.add('dead'); // Classe 'dead' do seu CSS deve dar o visual de derrotado
+            await animate(humanEl, 'human-defeat-animation', 300); // Crie 'human-defeat-animation' no CSS
+        }
+    }
+    
+    async function animateGorillaDamage(damageAmount) {
+        isAnimating = true;
+        await animate(mainGorillaImg, 'shake', 700); // 'shake' é do seu CSS
+
+        // Mostrar texto de dano flutuante (opcional, requer CSS para .damage-float)
+        if (damageAmount > 0 && mainGorillaImg.parentElement) {
+            const damageTextEl = document.createElement('div');
+            damageTextEl.textContent = `-${damageAmount}`;
+            damageTextEl.className = 'damage-float'; // Estilize .damage-float no CSS
+            mainGorillaImg.parentElement.style.position = 'relative'; // Para posicionamento absoluto
+            mainGorillaImg.parentElement.appendChild(damageTextEl);
+            setTimeout(() => damageTextEl.remove(), 1000); // Remove após 1s
+        }
+        // isAnimating será setado para false pela função que chamou esta
+    }
+
+    //Ações do Gorila
+    attackBtn.addEventListener('click', async () => {
+        if (isGameOver || isAnimating || currentPlayerTurn !== 'gorilla' || gorillaState.energy < ATTACK_ENERGY_COST) {
+            if (gorillaState.energy < ATTACK_ENERGY_COST && !isAnimating && currentPlayerTurn === 'gorilla') {
+                addLogEntry("Gorila com pouca energia para atacar!", "system");
+                await animate(mainGorillaImg, 'shake', 300);
+            }
+            return;
+        }
+        
+        isAnimating = true; // Bloqueia outras ações
+        enableActionButtons(false);
+
+        gorillaState.energy -= ATTACK_ENERGY_COST;
+        gorillaState.attacksMade++;
+        updateGorillaStatusDisplay();
+
+        addLogEntry("Gorila se prepara para o ATAQUE!", "gorilla");
+        await animateGorillaAction('attack-animation', 600); // Sua classe CSS 'attack-animation'
+
+        let numHumansToAttack = Math.floor(Math.random() * (HUMANS_TO_ATTACK_MAX - HUMANS_TO_ATTACK_MIN + 1)) + HUMANS_TO_ATTACK_MIN;
+        let humansDefeatedThisTurn = 0;
+        const defeatedHumanElementsForAnimation = [];
+
+        let humanElements = humansGridContainer.querySelectorAll('.human.alive');
+        
+        for (let i = 0; i < numHumansToAttack && i < humanElements.length; i++) {
+            const humanElToDefeat = humanElements[i]; // Pega os primeiros N humanos vivos na grade
+            const humanId = parseInt(humanElToDefeat.dataset.humanId);
+            const humanObj = humansArray.find(h => h.id === humanId);
+
+            if (humanObj && humanObj.alive) {
+                humanObj.alive = false;
+                humansAliveCount--;
+                humansDefeatedThisTurn++;
+                defeatedHumanElementsForAnimation.push(humanElToDefeat);
+            }
+        }
+
+        if (humansDefeatedThisTurn > 0) {
+            addLogEntry(`Gorila ATACA e derrota ${humansDefeatedThisTurn} humanos!`, "gorilla");
+            await animateHumansDefeated(defeatedHumanElementsForAnimation);
+        } else if (humansAliveCount > 0) {
+            addLogEntry("Gorila ataca, mas erra todos os humanos restantes!", "gorilla");
+        } else {
+            addLogEntry("Gorila ataca, mas não há mais humanos!", "gorilla");
+        }
+        
+        updateHumansRemainingDisplay(); // Atualiza contador
+        // renderHumans(); // Opcional: se a animação já atualiza o visual, pode não ser necessário
+        
+        isAnimating = false; // Libera após todas as animações de ataque
+        endGorillaTurn();
+    });
+
+    defendBtn.addEventListener('click', async () => {
+        if (isGameOver || isAnimating || currentPlayerTurn !== 'gorilla' || gorillaState.energy < DEFEND_ENERGY_COST) {
+             if (gorillaState.energy < DEFEND_ENERGY_COST && !isAnimating && currentPlayerTurn === 'gorilla') {
+                addLogEntry("Gorila com pouca energia para defender!", "system");
+                 await animate(mainGorillaImg, 'shake', 300);
+            }
+            return;
+        }
+        isAnimating = true;
+        enableActionButtons(false);
+
+        gorillaState.energy -= DEFEND_ENERGY_COST;
+        gorillaState.defenseBonus = Math.min(MAX_GORILLA_DEFENSE_BONUS, gorillaState.defenseBonus + DEFEND_BONUS_GAIN);
+        updateGorillaStatusDisplay();
+        
+        addLogEntry(`Gorila assume postura DEFENSIVA! (Bônus Defesa: +${DEFEND_BONUS_GAIN})`, "gorilla");
+        await animateGorillaAction('defense-animation', 800); // Crie 'defense-animation' no CSS (ex: brilho azul)
+
+        isAnimating = false;
+        endGorillaTurn();
+    });
 })
