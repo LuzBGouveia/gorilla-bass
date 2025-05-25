@@ -93,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function resetGameVariables() {
         console.log("RESET: Resetando variáveis do jogo.");
-        gorillaState = { health: MAX_GORILLA_HEALTH, stamina: MAX_GORILLA_ENERGY, defenseBonus: 0, attacksMade: 0 };
+        gorillaState = { health: MAX_GORILLA_HEALTH, energy: MAX_GORILLA_ENERGY, defenseBonus: 0, attacksMade: 0 };
         humansAliveCount = TOTAL_HUMANS;
         representativeHumans = Array.from({ length: NUM_REPRESENTATIVE_IMAGES }, (_, i) => ({
             id: i, alive: true, health: HUMANS_PER_REPRESENTATIVE
@@ -110,13 +110,13 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateGorillaStatusDisplay() {
         if (gorillaHealthProgress) gorillaHealthProgress.value = gorillaState.health;
         if (gorillaHealthText) gorillaHealthText.textContent = `${gorillaState.health}/${MAX_GORILLA_HEALTH}`;
-        if (gorillaEnergyProgress) gorillaEnergyProgress.value = gorillaState.stamina;
-        if (gorillaEnergyText) gorillaEnergyText.textContent = `${gorillaState.stamina}/${MAX_GORILLA_ENERGY}`;
+        if (gorillaEnergyProgress) gorillaEnergyProgress.value = gorillaState.energy;
+        if (gorillaEnergyText) gorillaEnergyText.textContent = `${gorillaState.energy}/${MAX_GORILLA_ENERGY}`;
         if (gorillaDefenseProgress) gorillaDefenseProgress.value = gorillaState.defenseBonus;
         if (gorillaDefenseText) gorillaDefenseText.textContent = `${gorillaState.defenseBonus}`;
         if (gorillaAttacksCountText) gorillaAttacksCountText.textContent = gorillaState.attacksMade;
         if (gorillaHealthProgress) gorillaHealthProgress.classList.toggle('low-health', gorillaState.health < MAX_GORILLA_HEALTH * 0.3);
-        if (gorillaEnergyProgress) gorillaEnergyProgress.classList.toggle('low-stamina', gorillaState.stamina < MAX_GORILLA_ENERGY * 0.3);
+        if (gorillaEnergyProgress) gorillaEnergyProgress.classList.toggle('low-energy', gorillaState.energy < MAX_GORILLA_ENERGY * 0.3);
     }
 
     function renderRepresentativeHumans() {
@@ -191,10 +191,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Ações do Gorila ---
-    async function handleGorillaAction(actionLogic, sound, logMessage, animation, staminaCost, passTurnArgs = [true]) {
-        console.log(`ACTION: Tentando ${logMessage}. Animando: ${isAnimating}, Turno: ${currentPlayerTurn}, Energia: ${gorillaState.stamina}, Custo: ${staminaCost}`);
-        if (isGameOver || isAnimating || currentPlayerTurn !== 'gorilla' || (staminaCost && gorillaState.stamina < staminaCost)) {
-            if (!isAnimating && currentPlayerTurn === 'gorilla' && staminaCost && gorillaState.stamina < staminaCost) {
+    async function handleGorillaAction(actionLogic, sound, logMessage, animation, energyCost, passTurnArgs = [true]) {
+        console.log(`ACTION: Tentando ${logMessage}. Animando: ${isAnimating}, Turno: ${currentPlayerTurn}, Energia: ${gorillaState.energy}, Custo: ${energyCost}`);
+        if (isGameOver || isAnimating || currentPlayerTurn !== 'gorilla' || (energyCost && gorillaState.energy < energyCost)) {
+            if (!isAnimating && currentPlayerTurn === 'gorilla' && energyCost && gorillaState.energy < energyCost) {
                 addLogEntry(`Gorila com pouca energia para ${logMessage.toLowerCase().split(' ')[0]}!`, "system");
                 if (gorillaImageToAnimate) await animate(gorillaImageToAnimate, 'shake', 300);
             }
@@ -204,8 +204,8 @@ document.addEventListener('DOMContentLoaded', () => {
         isAnimating = true; // TRAVA AQUI
         enableActionButtons(false);
 
-        if (staminaCost) {
-            gorillaState.stamina -= staminaCost;
+        if (energyCost) {
+            gorillaState.energy -= energyCost;
         }
         gorillaState.attacksMade += (logMessage.includes("ATAQUE") ? 1 : 0); // Só incrementa se for ataque
         updateGorillaStatusDisplay();
@@ -265,11 +265,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (restBtn) restBtn.addEventListener('click', () => handleGorillaAction(
         async () => { // actionLogic
-            const staminaGained = Math.min(REST_ENERGY_GAIN, MAX_GORILLA_ENERGY - gorillaState.stamina);
-            if (staminaGained > 0) {
-                gorillaState.stamina += staminaGained;
+            const energyGained = Math.min(REST_ENERGY_GAIN, MAX_GORILLA_ENERGY - gorillaState.energy);
+            if (energyGained > 0) {
+                gorillaState.energy += energyGained;
                 updateGorillaStatusDisplay();
-                addLogEntry(`Gorila recupera ${staminaGained} de energia. Energia atual: ${gorillaState.stamina}.`, "gorilla");
+                addLogEntry(`Gorila recupera ${energyGained} de energia. Energia atual: ${gorillaState.energy}.`, "gorilla");
             } else {
                 addLogEntry("Gorila tenta descansar, mas já está com energia máxima!", "system");
             }
@@ -456,7 +456,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 // Ajustes para garantir consistência com as constantes atuais do jogo
                 gorillaState.health = Math.min(gorillaState.health, MAX_GORILLA_HEALTH);
-                gorillaState.stamina = Math.min(gorillaState.stamina, MAX_GORILLA_ENERGY);
+                gorillaState.energy = Math.min(gorillaState.energy, MAX_GORILLA_ENERGY);
 
                 addLogEntry("Jogo anterior carregado!", "system");
                 console.log("LOAD: Jogo carregado. GameOver:", isGameOver);
