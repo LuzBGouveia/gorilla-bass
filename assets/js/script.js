@@ -451,5 +451,61 @@ document.addEventListener('DOMContentLoaded', () => {
         resetBtn.disabled = !canInteract;
     }
 
-    
+    //LocalStorage
+    const LOCAL_STORAGE_KEY = 'gorillaBassGameState';
+
+    function saveGameState() {
+        if (isGameOver && gorillaState.health <= 0) {
+            // Não salva o estado se o gorila perdeu, para permitir um novo jogo ao recarregar
+            localStorage.removeItem(LOCAL_STORAGE_KEY);
+            return;
+        }
+        const gameStateToSave = {
+            gorillaState: gorillaState,
+            humansArray: humansArray, // Salva o estado de cada humano
+            humansAliveCount: humansAliveCount,
+            // Não salvar isGameOver como true, ou isAnimating
+        };
+        try {
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(gameStateToSave));
+            console.log("Jogo salvo!");
+        } catch (e) {
+            console.error("Erro ao salvar o jogo:", e);
+            addLogEntry("Erro: Não foi possível salvar o progresso do jogo (limite de armazenamento?).", "system");
+        }
+    }
+
+    function loadGameState() {
+        const savedGameString = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (!savedGameString) return false;
+
+        try {
+            const loadedState = JSON.parse(savedGameString);
+            // Validação básica
+            if (loadedState.gorillaState && loadedState.humansArray && typeof loadedState.humansAliveCount === 'number') {
+                gorillaState = loadedState.gorillaState;
+                humansArray = loadedState.humansArray;
+                humansAliveCount = loadedState.humansAliveCount;
+                
+                // Ajustar valores para não excederem máximos (caso as constantes do jogo mudem)
+                gorillaState.health = Math.min(gorillaState.health, MAX_GORILLA_HEALTH);
+                gorillaState.energy = Math.min(gorillaState.energy, MAX_GORILLA_ENERGY);
+                gorillaState.defenseBonus = Math.min(gorillaState.defenseBonus, MAX_GORILLA_DEFENSE_BONUS);
+
+                addLogEntry("Jogo anterior carregado com sucesso!", "system");
+                return true;
+            } else {
+                console.warn("Dados salvos incompletos ou inválidos. Iniciando novo jogo.");
+                localStorage.removeItem(LOCAL_STORAGE_KEY); // Remove dados ruins
+                return false;
+            }
+        } catch (e) {
+            console.error("Erro ao carregar o jogo salvo:", e);
+            localStorage.removeItem(LOCAL_STORAGE_KEY); // Remove dados ruins
+            return false;
+        }
+    }
+
+    // --- Iniciar o Jogo ---
+    initializeGame();
 })
