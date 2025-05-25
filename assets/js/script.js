@@ -57,5 +57,47 @@ document.addEventListener('DOMContentLoaded', () => {
     let isAnimating = false; // Trava ações durante animações
     let isGameOver = false;
 
-    
+    //Inicialização do jogo
+    function initializeGame() { 
+        // Tenta carregar o estado salvo
+        if (loadGameState()) {
+            // Se carregou, verifica se o jogo já tinha acabado
+            if (gorillaState.health <= 0 || humansAliveCount <= 0) {
+                resetGameVariables(); // Reseta para um novo jogo se o carregado estava "game over"
+            }
+        } else {
+            resetGameVariables(); // Se não carregou, reseta para um novo jogo
+        }
+
+        isGameOver = false; // Garante que não está game over
+        currentPlayerTurn = 'gorilla';
+        isAnimating = false;
+
+        updateGorillaStatusDisplay();
+        renderHumans(); // Renderiza os humanos (pode ser otimizado se já estão no DOM do save)
+        updateHumansRemainingDisplay();
+        clearLog();
+        addLogEntry("A Batalha Começa! Turno do Gorila.", "system");
+        gameOverSection.style.display = 'none';
+        enableActionButtons(true);
+    }
+
+    function resetGameVariables() {
+        gorillaState = {
+            health: MAX_GORILLA_HEALTH,
+            energy: MAX_GORILLA_ENERGY,
+            defenseBonus: 0,
+            attacksMade: 0
+        };
+        humansAliveCount = TOTAL_HUMANS;
+        initializeHumansArray(); // Cria o array de humanos
+    }
+
+    function initializeHumansArray() {
+        humansArray = [];
+        for (let i = 0; i < TOTAL_HUMANS; i++) {
+            // Cada humano é um objeto com 'id' e 'alive'
+            humansArray.push({ id: i, alive: true });
+        }
+    }
 })
