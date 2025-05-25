@@ -28,15 +28,10 @@ body {
     flex-direction: column;
 }
 
-picture img {
-    min-width: 5px;
-    max-width: 15rem;
-}
-
-.status-acoes {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
+.animation {
+    max-width: 155rem;
+    height: fit-parent;
+    margin: 1rem;
     background-color: #2d4a2d;
     border-radius: 10px;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
@@ -46,6 +41,20 @@ picture img {
     display: flex;
     justify-content: space-around;
     
+}
+
+picture img {
+    min-width: 1rem;
+    max-width: 15rem;
+}
+
+.status-acoes {
+    max-width: 155rem;
+    margin: 1rem ;
+    padding: 1rem;
+    background-color: #2d4a2d;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
 }
 
 h1 {
@@ -188,42 +197,6 @@ h1 {
 .log-entry {
     padding: 5px;
     border-bottom: 1px solid #3a5a3a;
-    color: #ffffff;
-}
-
-.log-timestamp {
-    color: #b0b0b0;
-    margin-right: 8px;
-    font-size: 0.85em;
-}
-
-.log-entry-gorilla {
-    color: #a2d9a2;
-}
-.log-entry-gorilla .log-timestamp { 
-    color: #8fbc8f; 
-}
-
-.log-entry-human {
-    color: #f0a0a0;
-}
-.log-entry-human .log-timestamp {
-    color: #e08080;
-}
-
-.log-entry-system {
-    color: #aec6cf;
-}
-.log-entry-system .log-timestamp {
-    color: #9ab0b9;
-}
-
-.log-entry-error {
-    color: #ff8c69;
-    font-weight: bold;
-}
-.log-entry-error .log-timestamp {
-    color: #e57a5f;
 }
 
 @media (max-width: 768px) {
@@ -302,14 +275,10 @@ h1 {
     }
 }
 
-/* Animação de derrota do humano */
-.human.human-defeat-animation {
-    animation: humanDefeatEffect 0.5s forwards;
-}
-@keyframes humanDefeatEffect {
-    0% { transform: scale(0.8); opacity: 0.5; } /* Começa como .dead */
-    50% { transform: scale(0.9) rotate(15deg); opacity: 0.3; }
-    100% { transform: scale(0.4) translateY(30px); opacity: 0; } /* Some */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
 }
 
 /* Animação de derrota do humano */
