@@ -13,18 +13,29 @@ header {
 }
 
 body {
+    align-items: center;
     width: 100vw;
     background-color: #1a2f1a;
     color: #fff;
 }
 
 .game {
-    width: 40rem;
+    width: auto;
     text-align: center;
 }
 
-img {
-    width: 20rem;
+.chars {
+    justify-content: space-between;
+    gap: 100rem;
+}
+
+.chars div {
+    display: inline-block;
+}
+
+picture img {
+    min-width: 5px;
+    max-width: 15rem;
 }
 
 .status-acoes {
@@ -47,10 +58,6 @@ img {
     background-color: #2d4a2d;
     border-radius: 10px;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-}
-
-picture {
-    display: inline-block;
 }
 
 h1 {
