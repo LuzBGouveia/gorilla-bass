@@ -26,11 +26,12 @@
                         <div class="gorilla-defense">
                             <p>Defesa: </p><progress value="0" max="100" min="0" id="idVida"></progress><span id="gorilla-health-text">0/100</span>
                         </div>
+                        <p>Ataques Realizados: <span id="gorilla-attacks-count">0</span></p>
                     </div>
                     
                     <div class="humans-status">
                         <h2>Humanos</h2>
-                        <p>Restantes: <span id="humans-remaining">100</span>/100</p>
+                        <p>Restantes: <span id="humans-remaining-text">100</span>/100</p>
                     </div>
                 </div>
                 
@@ -46,25 +47,37 @@
                     <div class="gorilaImg">
                         <picture>
                             <figure>
-                                <img src="./assets/img/gorila.jpeg" alt="gorila">
+                                <img src="./assets/img/gorila.jpeg" alt="gorila" id="main-gorilla-img">
                                 <figcaption>Gorila</figcaption>
                             </figure>
                         </picture>
                     </div>
+                    <div class="vs-text">VS</div>
                     <div class="humanImg">
                         <picture>
-                            <figure>
-                                <img src="./assets/img/humano.png" alt="humano">
+                            <figure class="fighter human-fighter">
+                                <img src="./assets/img/humano.png" alt="humano" id="arena-human-img">
                                 <figcaption>Humano</figcaption>
                             </figure>
                         </picture>
                     </div>
+                    <div class="human-representatives-grid" id="human-representatives-container">
+                            <!-- 10 imagens de humanos serão geradas aqui pelo JS -->
+                    </div>
                 </div>
             </section>
+
+            <!-- Seção de Fim de Jogo -->
+            <section id="game-over-section" class="game-over-container"> <!-- Classe para estilização -->
+                <h2 id="game-over-message"></h2>
+                <button id="restart-game-btn" class="btn restart">Jogar Novamente</button>
+            </section>
+
+
         </section>
     </main>
     <footer>
-
+        <p>Integrantes: Enzo Okuizumi, Lucas Barros, Milton Marcelino, Gustavo Bardy</p>
     </footer>
 </body>
 </html>

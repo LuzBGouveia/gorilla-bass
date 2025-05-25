@@ -1,3 +1,5 @@
+@import url("./style2.css");
+
 * {
     margin: 0;
     padding: 0;
@@ -279,16 +281,189 @@ h1 {
     75% { transform: translateX(5px); }
 }
 
-.shake {
-    animation: shake 0.3s;
+/* Animação de derrota do humano */
+.human.human-defeat-animation {
+    animation: humanDefeatEffect 0.5s forwards;
+}
+@keyframes humanDefeatEffect {
+    0% { transform: scale(0.8); opacity: 0.5; } /* Começa como .dead */
+    50% { transform: scale(0.9) rotate(15deg); opacity: 0.3; }
+    100% { transform: scale(0.4) translateY(30px); opacity: 0; } /* Some */
 }
 
-@keyframes attack {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-    100% { transform: scale(1); }
+/* Animação de defesa do Gorila (ex: brilho azul) */
+#main-gorilla-img.defense-animation {
+    animation: gorillaDefensePulse 0.8s ease-out;
+}
+@keyframes gorillaDefensePulse {
+    0%, 100% { box-shadow: 0 0 0px transparent; }
+    50% { box-shadow: 0 0 25px 10px rgba(52, 152, 219, 0.7); } /* Azul da classe .defend */
 }
 
-.attack-animation {
-    animation: attack 0.3s;
+/* Animação de descanso do Gorila (ex: brilho verde) */
+#main-gorilla-img.rest-animation {
+    animation: gorillaRestGlow 1s ease-in-out;
+}
+@keyframes gorillaRestGlow {
+    0%, 100% { filter: brightness(100%); }
+    50% { filter: brightness(130%) drop-shadow(0 0 10px rgba(46, 204, 113, 0.8)); } /* Verde da classe .heal */
+}
+
+/* Animação de defesa bem-sucedida */
+#main-gorilla-img.defense-success-animation {
+    animation: defenseShine 0.6s ease-out;
+}
+@keyframes defenseShine {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; filter: drop-shadow(0 0 8px #3498db) brightness(1.2); }
+}
+
+/* Estilos para barras de vida/energia baixas */
+progress.low-health::-webkit-progress-value { background-color: #e74c3c; } /* Vermelho */
+progress.low-health::-moz-progress-bar { background-color: #e74c3c; }
+progress.low-stamina::-webkit-progress-value { background-color: #f39c12; } /* Laranja */
+progress.low-stamina::-moz-progress-bar { background-color: #f39c12; }
+
+
+/* Mensagem de fim de jogo no log */
+.log-entry.end-game-message {
+    font-weight: bold;
+    color: #f8d56b; /* Dourado */
+    text-align: center;
+    font-size: 1.1em;
+    border-top: 1px solid #f8d56b;
+    border-bottom: 1px solid #f8d56b;
+    padding: 10px 5px;
+}
+
+/* Estilo para a figura principal do Gorila no painel de status */
+.gorilla-status .gorilla-main-figure {
+    text-align: center;
+    margin-bottom: 15px;
+    position: relative; /* Para posicionamento de overlays de animação, como o damage-float */
+}
+
+#main-gorilla-img { /* ID da imagem principal do gorila */
+    max-width: 150px; /* Ou o tamanho que desejar */
+    height: auto;
+    border-radius: 10px;
+    border: 3px solid #f8d56b; /* Borda dourada */
+    transition: transform 0.2s ease-in-out; /* Para animações suaves */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+/* Grade para os representantes dos humanos */
+.human-representatives-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr); /* Ex: 5 colunas para 10 imagens */
+    gap: 8px;
+    margin-top: 15px;
+    padding: 10px;
+    background-color: rgba(0,0,0,0.2);
+    border-radius: 5px;
+    min-height: 100px; /* Para dar um espaço mesmo se vazio inicialmente */
+}
+
+.human-representative-img {
+    width: 100%;
+    max-width: 50px; /* Tamanho das pequenas imagens dos humanos */
+    height: auto;
+    aspect-ratio: 1/1; /* Para manter proporção se forem ícones */
+    object-fit: cover; /* Para cobrir o espaço se a imagem for retangular */
+    border-radius: 50%; /* Ícones redondos */
+    background-color: #6b8c6b; /* Fundo para quando a imagem não carregar ou para ícones simples */
+    border: 1px solid #8fbc8f;
+    opacity: 1;
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+
+.human-representative-img.defeated {
+    opacity: 0.2;
+    transform: scale(0.7) rotate(-15deg);
+    filter: grayscale(80%);
+}
+
+/* Seção de Fim de Jogo */
+.game-over-container {
+    display: none; /* Começa escondido */
+    text-align: center;
+    margin-top: 20px;
+    padding: 20px;
+    background-color: #3a5a3a;
+    border-radius: 8px;
+    border: 2px solid #f8d56b;
+}
+.game-over-container h2 {
+    color: #f8d56b;
+    margin-bottom: 15px;
+}
+
+/* Animações (mantendo as que você já tem e adicionando novas se necessário) */
+/* A sua .attack-animation no #main-gorilla-img */
+#main-gorilla-img.attack-animation { /* Aplicada diretamente à imagem */
+    animation: gorillaSwingAttack 0.6s ease-in-out;
+}
+@keyframes gorillaSwingAttack { /* Exemplo de animação de ataque mais elaborada */
+    0% { transform: scale(1) rotate(0deg); }
+    30% { transform: scale(1.1) translateX(-10px) rotate(-5deg); }
+    60% { transform: scale(1.2) translateX(20px) rotate(10deg); /* Ponto alto do "swing" */ }
+    100% { transform: scale(1) rotate(0deg); }
+}
+
+#main-gorilla-img.shake { /* Sua animação shake */
+    animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+/* Animação para os representantes humanos sendo atingidos */
+.human-representative-img.hit-by-gorilla {
+    animation: humanIconHit 0.4s ease-out;
+}
+@keyframes humanIconHit {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2) rotate(10deg); filter: brightness(1.5); }
+}
+
+/* Posicionamento do texto de dano relativo à figura do gorila */
+.gorilla-main-figure .damage-float { /* Alterado para ser relativo à figura */
+    position: absolute;
+    top: 10%; /* Ajuste para ficar bem sobre a imagem */
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 2em;
+    color: #e74c3c; /* Vermelho */
+    font-weight: bold;
+    text-shadow: 1px 1px 0 black, -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black; /* Contorno */
+    pointer-events: none;
+    animation: floatUpAndFadeDamage 1s forwards;
+    z-index: 100; /* Para ficar sobre outros elementos */
+}
+
+@keyframes floatUpAndFadeDamage { /* Movido para perto ou mantido se já existir e for global */
+    0% { opacity: 1; transform: translate(-50%, 0); }
+    100% { opacity: 0; transform: translate(-50%, -60px); }
+}
+
+/* Estilos para a Seção de Animação Visual do Combate */
+.combat-arena {
+    display: flex; /* Para alinhar os lutadores e o 'VS' horizontalmente */
+    justify-content: space-around; /* Espaça os elementos na arena */
+    align-items: center; /* Centraliza verticalmente os itens */
+    margin-top: 30px; /* Um pouco de espaço acima da arena */
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.2); /* Um fundo sutil */
+    border-radius: 8px;
+}
+
+.combat-arena .fighter img {
+    max-width: 150px; /* Define uma largura máxima para as imagens dos lutadores */
+    height: auto;     /* Mantém a proporção da imagem */
+    border-radius: 8px;
+    border: 2px solid #555; /* Uma borda sutil */
+}
+
+.combat-arena .vs-text {
+    font-size: 2.5em;
+    color: #f8d56b; /* Cor dourada para destaque */
+    font-weight: bold;
+    margin: 0 15px; /* Espaçamento lateral para o texto 'VS' */
 }
