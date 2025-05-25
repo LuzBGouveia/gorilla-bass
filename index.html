@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gorila vs Humanos</title>
     <link rel="stylesheet" href="./assets/css/style.css">
-    <script src="./assets/js/script.js"></script>
-    <title>Gorila vs 100 humanos</title>
+    <script src="./js/sript.js"></script>
 </head>
 <body>
     <header>
@@ -14,28 +14,63 @@
             <a href="./assets/paginas/faq.html">FAQ</a>
             <a href="./assets/paginas/integrantes.html">integrantes</a>
         </nav>
-        <h1>1 Gorila vs 100 humanos!</h1>
+        <h1>🦍 Gorila vs 100 Humanos 🧑‍🤝‍🧑</h1>
+        </nav>
     </header>
     <main>
-        <!-- Seção Gorila -->
-        <section>
-            <progress value="100" max="100" min="0" id="idVida"></progress>
-            <progress value="50" max="50" min="0" id="idEnergia"></progress>
-            <progress value="0" max="50" min="0" id="idDefesa"></progress>
-            <picture>
-                <figure>
-                    <img src="./assets/img/gorila.jpeg" alt="gorila">
-                    <figcaption>Gorila</figcaption>
-                </figure>
-            </picture>
-
+        <section class="game">
+            <section class="status-acoes">
+                <div class="game-status">
+                    <div class="gorilla-status">
+                        <h2>Gorila</h2>
+                        <div class="gorilla-health">
+                            <p>Vida: </p><progress value="100" max="100" min="0" id="idHealth"></progress><span id="gorilla-health-text">100/100</span>
+                        </div>
+                        <div class="gorilla-stamina">
+                            <p>Stamina: </p><progress value="50" max="50" min="0" id="idStam"></progress><span id="gorilla-stam-text">50/50</span>
+                        </div>
+                        <div class="gorilla-defense">
+                            <p>Defesa: </p><progress value="0" max="100" min="0" id="idVida"></progress><span id="gorilla-health-text">0/100</span>
+                        </div>
+                    </div>
+                    
+                    <div class="humans-status">
+                        <h2>Humanos</h2>
+                        <p>Restantes: <span id="humans-remaining">100</span>/100</p>
+                        <div class="humans-grid" id="humans-container"></div>
+                    </div>
+                </div>
+                
+                <div class="controls">
+                    <button id="attack-btn" class="btn attack">Atacar (10 energia)</button>
+                    <button id="defend-btn" class="btn defend">Defender (5 energia)</button>
+                    <button id="heal-btn" class="btn heal">Curar (15 energia)</button>
+                    <button id="restart-btn" class="btn restart">Reiniciar Jogo</button>
+                </div>
+                
+                <div class="battle-log">
+                    <h3>Registro de Batalha:</h3>
+                    <div id="log"></div>
+                </div>
+            </section>
+            <section class="animation">
+                <div class="imgs">
+                    <picture>
+                        <figure>
+                            <img src="./assets/img/gorila.jpeg" alt="gorila">
+                            <figcaption>Gorila</figcaption>
+                        </figure>
+                    </picture>
+                    <picture>
+                        <figure>
+                            <img src="./assets/img/humano.png" alt="humano">
+                            <figcaption>Humano</figcaption>
+                        </figure>
+                    </picture>
+                </div>
+            </section>
         </section>
-        <figure>
-                <img src="./assets/img/humano.png" alt="gorila">
-                <figcaption>Humano</figcaption>
-            </figure>
     </main>
-
     <footer>
 
     </footer>
