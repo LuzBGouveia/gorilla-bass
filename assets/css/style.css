@@ -161,3 +161,41 @@ h1 {
     padding: 5px;
     border-bottom: 1px solid #3a5a3a;
 }
+
+@media (max-width: 768px) {
+    .game-status {
+        flex-direction: column;
+    }
+    
+    .humans-status {
+        max-width: 100%;
+    }
+    
+    .controls {
+        flex-direction: column;
+    }
+    
+    .humans-grid {
+        grid-template-columns: repeat(5, 1fr);
+    }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.shake {
+    animation: shake 0.3s;
+}
+
+@keyframes attack {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.attack-animation {
+    animation: attack 0.3s;
+}
