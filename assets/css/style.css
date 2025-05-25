@@ -57,7 +57,7 @@ picture img {
 
 h1 {
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 1rem;
     color: #f8d56b;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
@@ -220,8 +220,19 @@ h1 {
 }
 
 @media (max-height: 845px) {
+    body {
+        overflow: hidden;
+    }
+    .status-acoes {
+        margin: 1rem;
+    }
     .game-status {
         flex-direction: column;
+    }
+
+    .animation {
+        margin: 0px;
+        padding: 0px;
     }
     
     .gorilla-status, .humans-status {
@@ -253,6 +264,12 @@ h1 {
         cursor: pointer;
         transition: all 0.2s;
         width: 6rem;
+    }
+}
+
+@media (min-height: 845px) {
+    .controls {
+        max-height: max-content;
     }
 }
 
