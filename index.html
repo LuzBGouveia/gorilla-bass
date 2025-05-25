@@ -13,102 +13,64 @@
     </header>
     <main>
         <section class="game">
-            <!-- Seção de Status e Controles -->
             <section class="status-acoes">
                 <div class="game-status">
-                    <!-- Status do Gorila -->
                     <div class="gorilla-status">
                         <h2>Gorila</h2>
-                        <div class="gorilla-health">
-                            <p>Vida: </p>
-                            <progress value="100" max="100" id="gorilla-health-progress"></progress>
-                            <span id="gorilla-health-text">100/100</span>
+                        <div class="gorilla-stamina">
+                            <p>Vida: </p><progress value="100" max="100" min="0" id="gorilla-health-progress"></progress><span id="gorilla-health-text">100/100</span>
                         </div>
                         <div class="gorilla-energy">
-                            <p>Energia: </p>
-                            <progress value="50" max="50" id="gorilla-energy-progress"></progress>
-                            <span id="gorilla-energy-text">50/50</span>
+                            <p>Stamina: </p><progress value="50" max="50" min="0" id="gorilla-energy-progress"></progress><span id="gorilla-health-text">50/50</span>
                         </div>
                         <div class="gorilla-defense">
-                            <p>Defesa Bônus: </p>
-                            <progress value="0" max="30" id="gorilla-defense-progress"></progress>
-                            <span id="gorilla-defense-text">0</span>
+                            <p>Defesa: </p><progress value="0" max="30" min="0" id="gorilla-defense-progress"></progress><span id="gorilla-defense-text">0/100</span>
                         </div>
-                        <p>Ataques Realizados: <span id="gorilla-attacks-count">0</span></p>
                     </div>
                     
                     <!-- Status dos Humanos -->
                     <div class="humans-status">
                         <h2>Humanos</h2>
-                        <p>Restantes: <span id="humans-remaining-text">100</span>/100</p>
+                        <p>Força Total Restante: <span id="humans-remaining-text">100</span>/100</p>
+                        <!-- Área para mostrar imagens representativas dos grupos de humanos -->
                     </div>
                 </div>
                 
                 <div class="controls">
                     <button id="attack-btn" class="btn attack">Atacar (10 energia)</button>
-                    <button id="defend-btn" class="btn defend">Defender (15 energia)</button>
-                    <button id="rest-btn" class="btn heal">Descansar (20 energia)</button>
+                    <button id="defend-btn" class="btn defend">Defender (5 energia)</button>
+                    <button id="health-btn" class="btn heal">Curar (15 energia)</button>
                     <button id="restart-btn" class="btn restart">Reiniciar Jogo</button>
                 </div>
-
-                <!-- Log de Batalha -->
-                <div class="battle-log">
-                    <h3>Registro de Batalha:</h3>
-                    <div id="log-entries-container"></div>
-                </div>
-
-                <!-- Seção de Fim de Jogo -->
-                <div id="game-over-section" class="game-over-container"> <!-- Classe para estilização -->
-                    <h2 id="game-over-message"></h2>
-                    <button id="restart-game-btn" class="btn restart">Jogar Novamente</button>
-                </div>
             </section>
-            <section class="animation">
-                <div class="chars">
-                    <div class="gorilaImg">
-                        <picture>
-                            <figure class="gorilla-main-figure">
-                                <img src="./assets/img/gorila.jpeg" alt="gorila" id="main-gorilla-img">
-                                <figcaption>Gorila</figcaption>
-                            </figure>
-                        </picture>
-                    </div>
+            <section class="arena">
+                <div class="combat-arena">
+                    <picture class="fighter gorilla-fighter">
+                        <figure>
+                            <img src="./assets/img/gorila.jpeg" alt="gorila" id="arena-gorilla-img">
+                            <figcaption>Gorila</figcaption>
+                        </figure>
+                    </picture>
                     <div class="vs-text">VS</div>
-                    <div class="humanImg">
-                        <picture>
-                            <figure class="fighter human-fighter">
-                                <img src="./assets/img/humano.png" alt="humano" id="arena-human-img">
-                                <figcaption>Humano</figcaption>
-                            </figure>
-                        </picture>
-                    </div>
-                    <div class="human-representatives-grid" id="human-representatives-container">
+                    <picture class="fighter human-fighter">
+                        <div class="human-representatives-grid" id="human-representatives-container">
                             <!-- 10 imagens de humanos serão geradas aqui pelo JS -->
-                    </div>
+                        </div>
+                    </picture>
                 </div>
             </section>
 
             <!-- Seção de Fim de Jogo -->
-            <section id="game-over-section" class="game-over-container"> <!-- Classe para estilização -->
-                <h2 id="game-over-message"></h2>
-                <button id="restart-game-btn" class="btn restart">Jogar Novamente</button>
-            </section>
-
-
+             <section id="fimSecao">
+                <div id="game-over-section" class="game-over-container"> <!-- Classe para estilização -->
+                    <h2 id="game-over-message"></h2>
+                    <button id="restart-game-btn" class="btn restart">Jogar Novamente</button>
+                </div>
+             </section>
         </section>
     </main>
     <footer>
         <p>Integrantes: Enzo Okuizumi, Lucas Barros, Milton Marcelino, Gustavo Bardy</p>
     </footer>
-
-    <!-- Elementos de Áudio (serão controlados pelo JS) -->
-    <audio id="sound-gorilla-attack" src="./assets/sounds/gorilla-attack.mp3" preload="auto"></audio>
-    <audio id="sound-gorilla-hurt" src="./assets/sounds/gorilla-hurt.mp3" preload="auto"></audio>
-    <audio id="sound-human-attack" src="./assets/sounds/human-attack.mp3" preload="auto"></audio>
-    <audio id="sound-human-die" src="./assets/sounds/human-die.mp3" preload="auto"></audio>
-    <audio id="sound-gorilla-defend" src="./assets/sounds/gorilla-defend.mp3" preload="auto"></audio>
-    <audio id="sound-gorilla-rest" src="./assets/sounds/gorilla-rest.mp3" preload="auto"></audio>
-    <audio id="sound-game-win" src="./assets/sounds/game-win.mp3" preload="auto"></audio>
-    <audio id="sound-game-lose" src="./assets/sounds/game-lose.mp3" preload="auto"></audio>
 </body>
 </html>
