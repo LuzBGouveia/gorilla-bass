@@ -3,22 +3,28 @@
     padding: 0;
     box-sizing: border-box;
     font-family: 'Arial', sans-serif;
+    list-style: none;
+    text-decoration: none;
 }
 
 header {
     text-align: center;
-    width: auto;
-    padding: 20px;
     background-color: #3f6e3f;
 }
 
 body {
+    width: 100vw;
     background-color: #1a2f1a;
     color: #fff;
 }
 
+.game {
+    width: 40rem;
+    text-align: center;
+}
+
 img {
-    width: ;
+    width: 20rem;
 }
 
 .status-acoes {
@@ -30,13 +36,21 @@ img {
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
 }
 
-main {
+.status-acoes .game-status {
+    display: flex;
+}
+
+.animation {
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
     background-color: #2d4a2d;
     border-radius: 10px;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+picture {
+    display: inline-block;
 }
 
 h1 {
@@ -113,7 +127,7 @@ h1 {
 .controls {
     display: flex;
     justify-content: center;
-    gap: 15px;
+    gap: 1rem;
     margin-bottom: 30px;
     flex-wrap: wrap;
 }
