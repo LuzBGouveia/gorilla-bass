@@ -44,3 +44,49 @@ h1 {
 .humans-status {
     max-width: 60%;
 }
+
+.health-bar {
+    width: 100%;
+    height: 30px;
+    background-color: #555;
+    border-radius: 5px;
+    margin: 10px 0;
+    overflow: hidden;
+}
+
+.health {
+    height: 100%;
+    background-color: #4CAF50;
+    width: 100%;
+    transition: width 0.3s;
+}
+
+.humans-grid {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 5px;
+    margin-top: 15px;
+}
+
+.human {
+    width: 100%;
+    aspect-ratio: 1/1;
+    background-color: #6b8c6b;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    transition: all 0.3s;
+}
+
+.human.alive {
+    background-color: #6b8c6b;
+}
+
+.human.dead {
+    background-color: #5a2d2d;
+    opacity: 0.5;
+    transform: scale(0.8);
+}
