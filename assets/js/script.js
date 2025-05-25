@@ -24,5 +24,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const restartBtn = document.getElementById('restart-btn');
 
     // Constantes do jogo
+    const MAX_GORILLA_HEALTH = 100;
+    const MAX_GORILLA_ENERGY = 50;
+    const MAX_GORILLA_DEFENSE_BONUS = 30;
+    const TOTAL_HUMANS = 100;
+
+    const ATTACK_ENERGY_COST = 10;
+    const DEFEND_ENERGY_COST = 15; // Custo para defender
+    const DEFEND_BONUS_GAIN = 10; // Ganho de bônus de defesa
+    const REST_ENERGY_GAIN = 20;  // Ganho de energia ao descansar
+
+    const HUMANS_TO_ATTACK_MIN = 2; // Gorila ataca no mínimo X humanos
+    const HUMANS_TO_ATTACK_MAX = 5; // Gorila ataca no máximo X humanos
+
+    const HUMANS_ATTACK_POWER_MIN = 1;
+    const HUMANS_ATTACK_POWER_MAX = 2;
+    const HUMANS_ATTACK_CHANCE_PER_HUMAN_GROUP = 0.25; // 25% de chance de um grupo de humanos atacar
+    const NUM_HUMANS_IN_ATTACKING_GROUP = 5; // Quantos humanos atacam juntos como um "grupo"
+
+    
+
     
 })
