@@ -26,15 +26,10 @@ body {
     flex-direction: column;
 }
 
-picture img {
-    min-width: 5px;
-    max-width: 15rem;
-}
-
-.status-acoes {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
+.arena {
+    max-width: 155rem;
+    height: fit-parent;
+    margin: 1rem;
     background-color: #2d4a2d;
     border-radius: 10px;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
@@ -44,6 +39,20 @@ picture img {
     display: flex;
     justify-content: space-around;
     
+}
+
+picture img {
+    min-width: 1rem;
+    max-width: 15rem;
+}
+
+.status-acoes {
+    max-width: 155rem;
+    margin: 1rem ;
+    padding: 1rem;
+    background-color: #2d4a2d;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
 }
 
 h1 {
@@ -186,42 +195,301 @@ h1 {
 .log-entry {
     padding: 5px;
     border-bottom: 1px solid #3a5a3a;
-    color: #ffffff;
 }
 
-.log-timestamp {
-    color: #b0b0b0;
-    margin-right: 8px;
-    font-size: 0.85em;
+@media (max-width: 768px) {
+    body {
+        overflow: hidden;
+    }
+    .game-status {
+        flex-direction: column;
+    }
+    
+    .humans-status {
+        max-width: 100%;
+    }
+    
+    .controls {
+        flex-direction: column;
+    }
+    
+    picture img {
+    min-width: 0.3rem;
+    max-width: 5rem;
+    }
 }
 
-.log-entry-gorilla {
-    color: #a2d9a2;
-}
-.log-entry-gorilla .log-timestamp { 
-    color: #8fbc8f; 
+@media (max-height: 845px) {
+    body {
+        overflow: hidden;
+    }
+    .status-acoes {
+        margin: 1rem;
+    }
+    .game-status {
+        flex-direction: column;
+    }
+
+    .arena {
+        margin: 0px;
+        padding: 0px;
+    }
+    
+    .gorilla-status, .humans-status {
+        padding: 0.1rem;
+        max-width: 100%;
+        
+    }
+    
+    picture img {
+        min-width: 0.3rem;
+        max-width: 5rem;
+    }
+
+    .controls {
+        flex-wrap: wrap;
+        display: block;
+        height: auto;
+        margin-bottom: 0px;
+    }
+
+    .btn {
+        display: inline;
+        text-align: center;
+        height: 3rem;
+        padding: 0.1rem 0.2rem;
+        border: none;
+        border-radius: 5px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.2s;
+        width: 6rem;
+    }
 }
 
-.log-entry-human {
-    color: #f0a0a0;
-}
-.log-entry-human .log-timestamp {
-    color: #e08080;
-}
-
-.log-entry-system {
-    color: #aec6cf;
-}
-.log-entry-system .log-timestamp {
-    color: #9ab0b9;
+@media (min-height: 845px) {
+    .controls {
+        max-height: max-content;
+    }
 }
 
-.log-entry-error {
-    color: #ff8c69;
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.shake {
+    arena: shake 0.3s;
+}
+
+@keyframes attack {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.attack-arena {
+    arena: attack 0.3s;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+    list-style: none;
+    text-decoration: none;
+}
+
+header {
+    text-align: center;
+    background-color: #3f6e3f;
+}
+
+body {
+    align-items: center;
+    width: 100vw;
+    background-color: #1a2f1a;
+    color: #fff;
+}
+
+.game {
+    width: auto;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+}
+
+.animation {
+    max-width: 155rem;
+    height: fit-parent;
+    margin: 1rem;
+    background-color: #2d4a2d;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.chars {
+    display: flex;
+    justify-content: space-around;
+    
+}
+
+picture img {
+    min-width: 1rem;
+    max-width: 15rem;
+}
+
+.status-acoes {
+    max-width: 155rem;
+    margin: 1rem ;
+    padding: 1rem;
+    background-color: #2d4a2d;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 1rem;
+    color: #f8d56b;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.game-status {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    gap: 1rem;
+}
+
+.gorilla-status, .humans-status {
+    background-color: #3a5a3a;
+    padding: 20px;
+    border-radius: 8px;
+    flex: 1;
+}
+
+.humans-status {
+    max-width: 60%;
+}
+
+.health-bar {
+    width: 100%;
+    height: 30px;
+    background-color: #555;
+    border-radius: 5px;
+    margin: 10px 0;
+    overflow: hidden;
+}
+
+.health {
+    height: 100%;
+    background-color: #4CAF50;
+    width: 100%;
+    transition: width 0.3s;
+}
+
+.humans-grid {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 5px;
+    margin-top: 15px;
+}
+
+.human {
+    width: 100%;
+    aspect-ratio: 1/1;
+    background-color: #6b8c6b;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
     font-weight: bold;
+    transition: all 0.3s;
 }
-.log-entry-error .log-timestamp {
-    color: #e57a5f;
+
+.human.alive {
+    background-color: #6b8c6b;
+}
+
+.human.dead {
+    background-color: #5a2d2d;
+    opacity: 0.5;
+    transform: scale(0.8);
+}
+
+.controls {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+}
+
+.btn {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+.attack {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.defend {
+    background-color: #3498db;
+    color: white;
+}
+
+.heal {
+    background-color: #2ecc71;
+    color: white;
+}
+
+.restart {
+    background-color: #f39c12;
+    color: white;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.battle-log {
+    background-color: #1e2e1e;
+    padding: 20px;
+    border-radius: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.battle-log h3 {
+    margin-bottom: 10px;
+    color: #f8d56b;
+}
+
+#log {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.log-entry {
+    padding: 5px;
+    border-bottom: 1px solid #3a5a3a;
 }
 
 @media (max-width: 768px) {
@@ -300,8 +568,17 @@ h1 {
     }
 }
 
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
 /* Animação de derrota do humano */
 .human.human-defeat-animation {
+    opacity: 0.2;
+    transform: scale(0.7) rotate(-15deg);
+    filter: grayscale(80%);
     animation: humanDefeatEffect 0.5s forwards;
 }
 @keyframes humanDefeatEffect {
@@ -328,25 +605,6 @@ h1 {
     50% { filter: brightness(130%) drop-shadow(0 0 10px rgba(46, 204, 113, 0.8)); } /* Verde da classe .heal */
 }
 
-/* Texto de dano flutuante */
-/* .damage-float {
-    position: absolute;
-    top: 20%; /* Ajuste conforme necessário sobre a imagem do gorila */
-/*    left: 50%;
-    transform: translateX(-50%);
-    font-size: 2em;
-    color: #e74c3c; /* Vermelho */
-/*    font-weight: bold;
-    text-shadow: 1px 1px 0 black, -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black; /* Contorno */
-/*    pointer-events: none;
-    animation: floatUpAndFadeDamage 1s forwards;
-    z-index: 100; /* Para ficar sobre outros elementos */
-/* }
-@keyframes floatUpAndFadeDamage {
-    0% { opacity: 1; transform: translate(-50%, 0); }
-    100% { opacity: 0; transform: translate(-50%, -60px); }
-} */
-
 /* Animação de defesa bem-sucedida */
 #main-gorilla-img.defense-success-animation {
     animation: defenseShine 0.6s ease-out;
@@ -359,8 +617,9 @@ h1 {
 /* Estilos para barras de vida/energia baixas */
 progress.low-health::-webkit-progress-value { background-color: #e74c3c; } /* Vermelho */
 progress.low-health::-moz-progress-bar { background-color: #e74c3c; }
-progress.low-energy::-webkit-progress-value { background-color: #f39c12; } /* Laranja */
-progress.low-energy::-moz-progress-bar { background-color: #f39c12; }
+progress.low-stamina::-webkit-progress-value { background-color: #f39c12; } /* Laranja */
+progress.low-stamina::-moz-progress-bar { background-color: #f39c12; }
+
 
 /* Mensagem de fim de jogo no log */
 .log-entry.end-game-message {
@@ -381,7 +640,7 @@ progress.low-energy::-moz-progress-bar { background-color: #f39c12; }
 }
 
 #main-gorilla-img { /* ID da imagem principal do gorila */
-    max-width: 150px; /* Ou o tamanho que desejar */
+    max-width: 150px;
     height: auto;
     border-radius: 10px;
     border: 3px solid #f8d56b; /* Borda dourada */
@@ -401,7 +660,7 @@ progress.low-energy::-moz-progress-bar { background-color: #f39c12; }
     min-height: 100px; /* Para dar um espaço mesmo se vazio inicialmente */
 }
 
-.human-representative-img {
+human-fighter {
     width: 100%;
     max-width: 50px; /* Tamanho das pequenas imagens dos humanos */
     height: auto;
@@ -414,7 +673,7 @@ progress.low-energy::-moz-progress-bar { background-color: #f39c12; }
     transition: opacity 0.5s ease-out, transform 0.5s ease-out;
 }
 
-.human-representative-img.defeated {
+.human-fighter.defeated {
     opacity: 0.2;
     transform: scale(0.7) rotate(-15deg);
     filter: grayscale(80%);
@@ -452,7 +711,7 @@ progress.low-energy::-moz-progress-bar { background-color: #f39c12; }
 }
 
 /* Animação para os representantes humanos sendo atingidos */
-.human-representative-img.hit-by-gorilla {
+.human-fighter.hit-by-gorilla {
     animation: humanIconHit 0.4s ease-out;
 }
 @keyframes humanIconHit {
@@ -491,16 +750,10 @@ progress.low-energy::-moz-progress-bar { background-color: #f39c12; }
     border-radius: 8px;
 }
 
-.combat-arena .fighter img {
-    max-width: 150px; /* Define uma largura máxima para as imagens dos lutadores */
-    height: auto;     /* Mantém a proporção da imagem */
-    border-radius: 8px;
-    border: 2px solid #555; /* Uma borda sutil */
-}
-
 .combat-arena .vs-text {
     font-size: 2.5em;
     color: #f8d56b; /* Cor dourada para destaque */
     font-weight: bold;
     margin: 0 15px; /* Espaçamento lateral para o texto 'VS' */
 }
+
