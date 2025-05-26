@@ -19,11 +19,6 @@
                     <!-- Status do Gorila -->
                     <div class="gorilla-status">
                         <h2>Gorila</h2>
-                        <figure class="gorilla-main-figure">
-                            <!-- Imagem principal do Gorila para status E ANIMAÇÃO -->
-                            <img src="./assets/img/gorila.jpeg" alt="Gorila em Posição de Combate" id="main-gorilla-img">
-                            <!-- <figcaption>O Poderoso</figcaption> --> <!-- Legenda opcional -->
-                        </figure>
                         <div class="gorilla-health">
                             <p>Vida: </p>
                             <progress value="100" max="100" id="gorilla-health-progress"></progress>
@@ -45,8 +40,8 @@
                     <!-- Status dos Humanos -->
                     <div class="humans-status">
                         <h2>Humanos</h2>
-                        <p>Restantes: <span id="humans-remaining">100</span>/100</p>
-                        <div class="humans-grid" id="humans-container"></div>
+                        <p>Restantes: <span id="humans-remaining-text">100</span>/100</p>
+                        
                     </div>
                 </div>
                 
@@ -72,13 +67,15 @@
 
             <!-- Seção de Animação Visual do Combate (Opcional, se a imagem do gorila no status já for a principal) -->
             <section class="combat-arena">
-                <div class="fighter gorilla-fighter">
-                    <img src="./assets/img/gorila.jpeg" alt="Gorila Lutando" id="arena-gorilla-img">
-                </div>
+                <figure class="gorilla-main-figure">
+                    <img src="./assets/img/gorila.jpeg" alt="Gorila Lutando" id="main-gorilla-img">
+                </figure>
                 <div class="vs-text">VS</div>
-                <div class="fighter human-fighter">
-                    <img src="./assets/img/humano.png" alt="Humano Lutando" id="arena-human-img">
-                </div>
+                <picture class="fighter human-fighter">
+                    <div class="human-representatives-grid" id="human-representatives-container">
+                        <!-- 10 imagens de humanos serão geradas aqui pelo JS -->
+                    </div>
+                </picture>
             </section>
         </section>
     </main>
