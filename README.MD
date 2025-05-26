@@ -48,24 +48,12 @@ gorilla-bass/
 │   ├── js/
 │   │   └── script.js        # Lógica principal do jogo
 │   └── sounds/
-│       ├── game-lose.mp3
-│       ├── game-win.mp3
-│       ├── gorilla-attack.mp3
-│       ├── gorilla-defend.mp3
-│       ├── gorilla-hurt.mp3
-│       ├── gorilla-rest.mp3
-│       ├── human-attack.mp3
-│       └── human-die.mp3    # Efeitos sonoros
+│       ├── dor.wav
+│       ├── humanoAtaque.mp3
+│       ├── monkeHurt.ogg
+│       ├── monkeSound.wav
+│       ├── punch.mp3
+│       └── win.mp3          # Efeitos sonoros
 ├── index.html               # Arquivo HTML principal
 └── README.md                # Este arquivo
 ```
-
-## 🧑‍💻 Autores
-
-*   Enzo Okuizumi RM561432
-*   Lucas Barros Gouveia RM566422
-*   Milton Jakson de Sousa Marcelino RM564836
-*   Gustavo Bardy Casimiro RM566136
-
----
-_Projeto desenvolvido para disciplina de Front-end para CP3._
