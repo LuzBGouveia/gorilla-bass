@@ -19,6 +19,9 @@
                     <!-- Status do Gorila -->
                     <div class="gorilla-status">
                         <h2>Gorila</h2>
+                        <figure class="gorilla-main-figure">
+                            <img src="./assets/img/gorila.jpeg" alt="Gorila Lutando" id="main-gorilla-img">
+                        </figure>
                         <div class="gorilla-health">
                             <p>Vida: </p>
                             <progress value="100" max="100" id="gorilla-health-progress"></progress>
@@ -36,6 +39,8 @@
                         </div>
                         <p>Ataques Realizados: <span id="gorilla-attacks-count">0</span></p>
                     </div>
+
+                    <div class="vs-text">VS</div>
                     
                     <!-- Status dos Humanos -->
                     <div class="humans-status">
@@ -70,10 +75,6 @@
 
             <!-- Seção de Animação Visual do Combate (Opcional, se a imagem do gorila no status já for a principal) -->
             <section class="combat-arena">
-                <figure class="gorilla-main-figure">
-                    <img src="./assets/img/gorila.jpeg" alt="Gorila Lutando" id="main-gorilla-img">
-                </figure>
-                <div class="vs-text">VS</div>
                 <picture class="fighter human-fighter">
                     <div class="human-representatives-grid" id="human-representatives-container">
                         <!-- 10 imagens de humanos serão geradas aqui pelo JS -->
