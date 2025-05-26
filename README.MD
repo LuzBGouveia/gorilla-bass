@@ -57,3 +57,11 @@ gorilla-bass/
 ├── index.html               # Arquivo HTML principal
 └── README.md                # Este arquivo
 ```
+
+--- 
+## Integrantes da Equipe
+
+*   Enzo Okuizumi RM561432
+*   Lucas Barros Gouveia RM566422
+*   Milton Jakson de Sousa Marcelino RM564836
+*   Gustavo Bardy Casimiro RM566136
