@@ -68,4 +68,4 @@ gorilla-bass/
 *   Gustavo Bardy Casimiro RM566136
 
 ---
-_Projeto desenvolvido como parte de um exercício ou trabalho acadêmico._
+_Projeto desenvolvido para disciplina de Front-end para CP3._
