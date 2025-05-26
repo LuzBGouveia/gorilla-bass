@@ -541,5 +541,9 @@ progress.low-energy::-moz-progress-bar { background-color: #f39c12; }
     color: #f8d56b; /* Cor dourada para destaque */
     font-weight: bold;
     margin: 0 15px; /* Espaçamento lateral para o texto 'VS' */
-    vertical-align: middle;
+}
+
+footer {
+    margin: 1rem;
+    text-align: center;
 }
