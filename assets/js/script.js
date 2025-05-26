@@ -34,8 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
         humanAttack: document.getElementById('sound-human-attack'),
         humanDie: document.getElementById('sound-human-die'),
         gorillaDefend: document.getElementById('sound-gorilla-defend'),
-        gorillaRest: document.getElementById('sound-gorilla-rest'),
-        gameWin: document.getElementById('sound-game-win')
+        gorillaRest: document.getElementById('sound-gorilla-rest')
     };
 
     // --- Constantes ---
@@ -488,7 +487,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Não chama initializeGame(), apenas configura a tela de fim de jogo.
                     // A mensagem e som já devem ter sido salvos ou podem ser deduzidos.
                     let msg = gorillaState.health <= 0 ? "Os humanos venceram! O Gorila foi derrotado." : "O Gorila venceu! Todos os humanos foram eliminados.";
-                    let sound = gorillaState.health <= 0 ? sounds.gameLose : sounds.gameWin;
                     // Chamamos triggerGameOver aqui para mostrar a tela, mas sem tocar o som novamente se já tocou.
                     // Para simplificar, vamos deixar triggerGameOver tocar o som, mas o ideal seria não se o estado já é game over.
                     // Por ora, vamos direto para configurar a UI de game over.
