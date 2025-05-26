@@ -73,21 +73,29 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Inicialização e Reset ---
     function initializeGame() {
         console.log("INIT: Iniciando jogo...");
-        loadGameState(); // Tenta carregar, se falhar, resetGameVariables é chamado internamente por loadGameState ou aqui
+        
+        const loadedSuccessfully = loadGameState(); 
 
-        // Se o jogo carregado estava 'game over', loadGameState já terá chamado triggerGameOver.
-        // Se não estava 'game over' ou é um novo jogo, resetamos explicitamente alguns estados de controle de turno.
-        if (!isGameOver) { // Só faz isso se não estivermos já numa tela de game over vinda do load
-            isGameOver = false;
+        if (!loadedSuccessfully || !isGameOver) { 
+            if(!loadedSuccessfully) { // Se não carregou NADA, reseta as variáveis e o log
+                resetGameVariables(); 
+                clearLog(); // Limpa o DOM do log
+                addLogEntry("A Batalha Começa! Turno do Gorila.", "system");
+            } else {
+                // Se carregou um jogo que NÃO estava game over, o log já foi restaurado por loadGameState.
+                // Apenas garantimos que a última mensagem seja sobre o turno atual.
+                // Se loadGameState restaurou o log, não limpamos.
+                 addLogEntry("Jogo Continuado. Turno do Gorila.", "system");
+            }
+            isGameOver = false; // Garante que não está game over se não foi carregado como tal
             currentPlayerTurn = 'gorilla';
             isAnimating = false;
-            clearLog();
-            addLogEntry("A Batalha Começa! Turno do Gorila.", "system");
         }
-        
-        updateAllDisplays(); // Atualiza todos os displays
+        // Se isGameOver é true (carregado do save), a UI de game over já foi configurada por loadGameState.
+
+        updateAllDisplays(); 
         if (gameOverSection) gameOverSection.style.display = isGameOver ? 'block' : 'none';
-        enableActionButtons(!isGameOver); // Habilita se não for game over
+        enableActionButtons(!isGameOver); 
         console.log("INIT: Jogo inicializado. Turno:", currentPlayerTurn, "Animating:", isAnimating, "GameOver:", isGameOver);
     }
 
@@ -140,10 +148,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Log de Batalha ---
     function addLogEntry(message, type = "info") {
         if (!logEntriesContainer) { console.error("Elemento do Log não encontrado!"); return; }
-        console.log(`LOG [${type.toUpperCase()}]: ${message}`); // Log no console para depuração
+        // console.log(`LOG [${type.toUpperCase()}]: ${message}`); // Log no console para depuração
 
         const logEntry = document.createElement('div');
-        logEntry.classList.add('log-entry', `log-entry-${type}`); // Adiciona classe base e tipo
+        logEntry.classList.add('log-entry', `log-entry-${type}`); 
         
         const timestampSpan = document.createElement('span');
         timestampSpan.className = 'log-timestamp';
@@ -152,13 +160,18 @@ document.addEventListener('DOMContentLoaded', () => {
         logEntry.appendChild(timestampSpan);
         logEntry.appendChild(document.createTextNode(message));
 
-        logEntriesContainer.prepend(logEntry);
-        while (logEntriesContainer.children.length > 50) { // Aumentei um pouco o limite do log
+        logEntriesContainer.prepend(logEntry); // Adiciona no topo
+        
+        // Limita o número de entradas no DOM para performance, mas o log salvo pode ser maior
+        while (logEntriesContainer.children.length > 75) { 
             logEntriesContainer.removeChild(logEntriesContainer.lastChild);
         }
+        // Não chama saveGameState() aqui diretamente para evitar saves excessivos.
+        // O saveGameState é chamado após ações de turno.
     }
     function clearLog() {
         if (logEntriesContainer) logEntriesContainer.innerHTML = '';
+        // Não limpa o localStorage aqui, isso deve ser feito em um reset explícito do jogo.
     }
 
     // --- Animações de Combate ---
@@ -175,18 +188,69 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     async function animateGorillaDamageEffect(damageAmount) {
-        if (gorillaImageToAnimate) await animate(gorillaImageToAnimate, 'shake', 700);
+        // Adicionar um log para ver se a função é chamada e com qual valor
+        console.log(`animateGorillaDamageEffect CALLED with damage: ${damageAmount}`)
+
+        if (gorillaImageToAnimate) {
+            console.log('Gorilla image to animate:', gorillaImageToAnimate);
+            await animate(gorillaImageToAnimate, 'shake', 700);
+        } else {
+            console.error('gorillaImageToAnimate is NULL or UNDEFINED');
+            // Se não há imagem para animar o shake, talvez não devêssemos nem tentar o dano flutuante.
+            // Ou talvez haja uma imagem padrão para o dano flutuante?
+            // Por ora, vamos logar e continuar para ver se o texto de dano pode ser anexado a outro lugar.
+        }
+
         playSound(sounds.gorillaHurt);
-        if (damageAmount > 0 && gorillaImageToAnimate) {
-            const parentForDamageFloat = gorillaImageToAnimate.closest('.gorilla-main-figure, .fighter') || gorillaImageToAnimate.parentElement;
+
+        if (damageAmount > 0) { // Somente mostrar dano se houver dano real
+            // Priorizar a figura principal do gorila no painel de status para o dano flutuante
+            const mainGorillaFigure = document.querySelector('.gorilla-status .gorilla-main-figure');
+            console.log('mainGorillaFigure element:', mainGorillaFigure);
+
+            let parentForDamageFloat = null;
+
+            // Determinar o pai para o texto de dano
+            if (mainGorillaFigure && gorillaImageToAnimate && mainGorillaFigure.contains(gorillaImageToAnimate)) {
+                parentForDamageFloat = mainGorillaFigure;
+                console.log('Parent para dano flutuante (mainGorillaFigure):', parentForDamageFloat);
+            } else if (gorillaImageToAnimate) { 
+                // Fallback se a imagem principal não for a que está sendo "shaken"
+                // ou se gorillaImageToAnimate for, por exemplo, arenaGorillaImg
+                parentForDamageFloat = gorillaImageToAnimate.closest('.fighter') || gorillaImageToAnimate.parentElement;
+                console.log('Parent para dano flutuante (fallback a partir de gorillaImageToAnimate):', parentForDamageFloat);
+            } else if (mainGorillaFigure) {
+                // Se gorillaImageToAnimate for nulo, mas temos mainGorillaFigure, podemos usar como um último recurso?
+                parentForDamageFloat = mainGorillaFigure;
+                console.log('Parent para dano flutuante (fallback para mainGorillaFigure, pois gorillaImageToAnimate era nulo):', parentForDamageFloat);
+            }
+
             if (parentForDamageFloat) {
-                parentForDamageFloat.style.position = 'relative';
+                // Garantir que o pai direto para o texto de dano tenha position: relative
+                if (getComputedStyle(parentForDamageFloat).position === 'static') {
+                    parentForDamageFloat.style.position = 'relative';
+                    console.log('Aplicado position:relative ao parentForDamageFloat:', parentForDamageFloat);
+                }
+                
+                // debugger; // Ponto de interrupção para inspecionar no navegador
+                console.log('Criando texto de dano com valor:', damageAmount);
                 const damageTextEl = document.createElement('div');
                 damageTextEl.textContent = `-${damageAmount}`;
-                damageTextEl.className = 'damage-float';
+                damageTextEl.className = 'damage-float'; 
                 parentForDamageFloat.appendChild(damageTextEl);
-                setTimeout(() => damageTextEl.remove(), 1000);
+                console.log('Elemento de dano flutuante CRIADO e ANEXADO:', damageTextEl);
+                
+                setTimeout(() => {
+                    if (damageTextEl.parentElement) { 
+                        damageTextEl.remove();
+                        console.log('Elemento de dano flutuante REMOVIDO.');
+                    }
+                }, 1000); // Duração da animação CSS
+            } else {
+                console.error('Não foi possível determinar um parentForDamageFloat. Texto de dano não será exibido.');
             }
+        } else {
+            console.log('Nenhum dano (ou dano <= 0), texto de dano não será exibido.');
         }
     }
 
@@ -309,49 +373,62 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function humansTurnAction() {
-        console.log("HUMANS TURN: Iniciando ação dos humanos.");
+        console.log("HUMANS TURN ACTION: Iniciando ação dos humanos.");
         // isAnimating já foi setado para true pela ação do gorila.
 
         if (isGameOver || humansAliveCount <= 0) {
+            console.log("HUMANS TURN ACTION: Jogo terminado ou humanos derrotados. Encerrando turno dos humanos.");
             endHumansTurn(); // Leva ao reset de isAnimating e troca de turno
             return;
         }
 
-        if (Math.random() < HUMANS_ATTACK_CHANCE) {
+        const attackRoll = Math.random();
+        console.log(`HUMANS TURN ACTION: Attack roll: ${attackRoll.toFixed(2)} (Chance: ${HUMANS_ATTACK_CHANCE})`);
+
+        if (attackRoll < HUMANS_ATTACK_CHANCE) {
             playSound(sounds.humanAttack);
             addLogEntry(`Humanos se preparam para o ATAQUE!`, "human");
-            if (arenaHumanImg) await animate(arenaHumanImg, 'attack-animation', 500); // Animação do humano na arena
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            console.log("HUMANS TURN ACTION: Humanos decidiram atacar.");
+            if (arenaHumanImg) await animate(arenaHumanImg, 'attack-animation', 500);
+            await new Promise(resolve => setTimeout(resolve, 800)); // Pequena pausa para o log aparecer antes do resultado
 
             let potentialDamage = Math.floor(Math.random() * (HUMANS_ATTACK_POWER_MAX - HUMANS_ATTACK_POWER_MIN + 1)) + HUMANS_ATTACK_POWER_MIN;
             const damageAbsorbed = Math.min(potentialDamage, gorillaState.defenseBonus);
             const damageTaken = Math.max(0, potentialDamage - gorillaState.defenseBonus);
 
+            console.log(`HUMANS TURN ACTION: Potential Damage: ${potentialDamage}, Defense Bonus: ${gorillaState.defenseBonus}, Absorbed: ${damageAbsorbed}, Taken: ${damageTaken}`);
+
             gorillaState.health = Math.max(0, gorillaState.health - damageTaken);
             
             if (damageTaken > 0) {
                 addLogEntry(`Gorila é atingido e sofre ${damageTaken} de dano! (Defendido: ${damageAbsorbed})`, "human");
+                console.log("HUMANS TURN ACTION: Gorila sofreu dano. Chamando animateGorillaDamageEffect.");
                 await animateGorillaDamageEffect(damageTaken);
             } else if (potentialDamage > 0) {
                 addLogEntry("O ataque dos humanos é totalmente bloqueado pela defesa do Gorila!", "human");
+                console.log("HUMANS TURN ACTION: Ataque bloqueado pela defesa.");
                 if(gorillaImageToAnimate) await animate(gorillaImageToAnimate, 'defense-success-animation', 600);
             } else {
-                addLogEntry("Humanos tentam um ataque, mas falham em causar impacto!", "human");
+                // Este caso (potentialDamage <= 0) não deveria acontecer com a fórmula atual, mas é bom ter um log
+                addLogEntry("Humanos tentam um ataque, mas falham em causar impacto (dano potencial foi zero)!", "human");
+                console.log("HUMANS TURN ACTION: Ataque com dano potencial zero.");
                 await new Promise(resolve => setTimeout(resolve, 800));
             }
             updateGorillaStatusDisplay();
 
             if (gorillaState.defenseBonus > 0 && damageAbsorbed > 0) {
-                gorillaState.defenseBonus = Math.max(0, gorillaState.defenseBonus - Math.ceil(DEFEND_BONUS_GAIN / 3));
-                addLogEntry("A defesa bônus do Gorila enfraquece.", "system");
+                gorillaState.defenseBonus = Math.max(0, gorillaState.defenseBonus - Math.ceil(DEFEND_BONUS_GAIN / 3)); // Reduz um pouco a defesa se usada
+                addLogEntry("A defesa bônus do Gorila enfraquece após absorver dano.", "system");
+                console.log(`HUMANS TURN ACTION: Defesa do gorila reduzida para ${gorillaState.defenseBonus}`);
                 updateGorillaStatusDisplay();
             }
         } else {
             addLogEntry("Humanos hesitam e decidem não atacar desta vez.", "human");
+            console.log("HUMANS TURN ACTION: Humanos decidiram NÃO atacar.");
             await new Promise(resolve => setTimeout(resolve, 1000));
         }
         
-        endHumansTurn(); // Finaliza o turno dos humanos e reseta isAnimating
+        endHumansTurn(); 
     }
 
     function endHumansTurn() {
@@ -425,14 +502,32 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     // --- LocalStorage ---
-    const LOCAL_STORAGE_KEY = 'gorillaBassGameState_v4'; // Nova versão
+    const LOCAL_STORAGE_KEY = 'gorillaBassGameState_v5'; // Nova versão para incluir log
     function saveGameState() {
+        const logEntriesToSave = [];
+        if (logEntriesContainer) {
+            // Pega as entradas do log do DOM, mas apenas o texto e o tipo para recriar
+            // Poderia pegar as 50 mais recentes, por exemplo.
+            // Ou salvar todas e deixar o loadGameState decidir quantas carregar.
+            // Vamos salvar as entradas atuais no DOM.
+            for (let i = 0; i < logEntriesContainer.children.length; i++) {
+                const entryElement = logEntriesContainer.children[i];
+                const type = entryElement.className.replace('log-entry ', '').replace('log-entry-', '');
+                const textContent = entryElement.textContent.substring(entryElement.textContent.indexOf('] ') + 2); // Remove timestamp
+                logEntriesToSave.push({ text: textContent, type: type });
+            }
+        }
+
         const gameStateToSave = {
-            gorillaState, representativeHumans, humansAliveCount, isGameOver
+            gorillaState, 
+            representativeHumans, 
+            humansAliveCount, 
+            isGameOver,
+            logEntries: logEntriesToSave.slice(0, 50).reverse() // Salva as últimas 50, e inverte para ordem correta ao carregar
         };
         try {
             localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(gameStateToSave));
-            console.log("GAME SAVED. GameOver state:", isGameOver);
+            console.log("GAME SAVED. GameOver state:", isGameOver, "Log entries saved:", logEntriesToSave.length);
         } catch (e) {
             console.error("Erro ao salvar:", e); addLogEntry("Erro ao salvar jogo.", "error");
         }
@@ -442,8 +537,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const savedGameString = localStorage.getItem(LOCAL_STORAGE_KEY);
         if (!savedGameString) {
             console.log("LOAD: Nenhum save encontrado, resetando variáveis.");
-            resetGameVariables(); // Se não há save, reseta para o padrão ANTES de initializeGame
-            return false; // Indica que não carregou, mas resetou para um novo jogo
+            // resetGameVariables(); // Não reseta aqui, deixa initializeGame decidir
+            return false; 
         }
 
         try {
@@ -452,35 +547,38 @@ document.addEventListener('DOMContentLoaded', () => {
                 gorillaState = loadedState.gorillaState;
                 representativeHumans = loadedState.representativeHumans;
                 humansAliveCount = loadedState.humansAliveCount;
-                isGameOver = loadedState.isGameOver || false; // Carrega o estado de game over
+                isGameOver = loadedState.isGameOver || false; 
                 
-                // Ajustes para garantir consistência com as constantes atuais do jogo
                 gorillaState.health = Math.min(gorillaState.health, MAX_GORILLA_HEALTH);
                 gorillaState.energy = Math.min(gorillaState.energy, MAX_GORILLA_ENERGY);
 
+                // Restaura o log
+                clearLog(); // Limpa o log atual no DOM antes de carregar
+                if (loadedState.logEntries && Array.isArray(loadedState.logEntries)) {
+                    loadedState.logEntries.forEach(entry => {
+                        addLogEntry(entry.text, entry.type); // Adiciona na ordem salva (já invertida no save)
+                    });
+                }
+                
                 addLogEntry("Jogo anterior carregado!", "system");
-                console.log("LOAD: Jogo carregado. GameOver:", isGameOver);
+                console.log("LOAD: Jogo carregado. GameOver:", isGameOver, "Log entries loaded:", loadedState.logEntries ? loadedState.logEntries.length : 0);
 
                 if (isGameOver) {
-                    // Não chama initializeGame(), apenas configura a tela de fim de jogo.
-                    // A mensagem e som já devem ter sido salvos ou podem ser deduzidos.
                     let msg = gorillaState.health <= 0 ? "Os humanos venceram! O Gorila foi derrotado." : "O Gorila venceu! Todos os humanos foram eliminados.";
-                    let sound = gorillaState.health <= 0 ? sounds.gameLose : sounds.gameWin;
-                    // Chamamos triggerGameOver aqui para mostrar a tela, mas sem tocar o som novamente se já tocou.
-                    // Para simplificar, vamos deixar triggerGameOver tocar o som, mas o ideal seria não se o estado já é game over.
-                    // Por ora, vamos direto para configurar a UI de game over.
                     if (gameOverMessage) gameOverMessage.textContent = msg;
                     if (gameOverSection) gameOverSection.style.display = 'block';
-                    enableActionButtons(false); // Garante que os botões de ação estão desabilitados
+                    enableActionButtons(false); 
                 }
-                return true; // Indica que carregou com sucesso
+                return true; 
             }
-        } catch (e) { /* ... */ }
+        } catch (e) { 
+            console.warn("LOAD: Falha ao carregar/parsear save. Erro:", e);
+        }
         
-        console.warn("LOAD: Falha ao carregar/parsear save. Resetando variáveis.");
-        localStorage.removeItem(LOCAL_STORAGE_KEY);
-        resetGameVariables(); // Se o save é inválido, reseta
-        return false; // Indica que o save falhou
+        console.warn("LOAD: Save inválido ou dados faltando. Considerado como novo jogo.");
+        localStorage.removeItem(LOCAL_STORAGE_KEY); // Remove save inválido
+        // resetGameVariables(); // Não reseta aqui, deixa initializeGame decidir
+        return false;
     }
 
     // --- Iniciar o Jogo ---
