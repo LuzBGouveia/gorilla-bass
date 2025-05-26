@@ -7,8 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const gorillaHealthProgress = document.getElementById('gorilla-health-progress');
     const gorillaHealthText = document.getElementById('gorilla-health-text');
-    const gorillaEnergyProgress = document.getElementById('gorilla-stamina-progress');
-    const gorillaEnergyText = document.getElementById('gorilla-stamina-text');
+    const gorillaEnergyProgress = document.getElementById('gorilla-energy-progress');
+    const gorillaEnergyText = document.getElementById('gorilla-energy-text');
     const gorillaDefenseProgress = document.getElementById('gorilla-defense-progress');
     const gorillaDefenseText = document.getElementById('gorilla-defense-text');
     const gorillaAttacksCountText = document.getElementById('gorilla-attacks-count');
